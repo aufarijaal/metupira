@@ -15,11 +15,8 @@
                 <!-- Logo/Brand -->
                 <div class="flex items-center justify-between p-4 border-b border-base-300">
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-primary-content" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                            </svg>
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" v-if="isSidebarOpen">
+                            <img src="~/assets/img/metupira-icon.png" />
                         </div>
                         <transition name="fade">
                             <span v-if="isSidebarOpen" class="text-xl font-bold text-base-content">
@@ -29,7 +26,7 @@
                     </div>
 
                     <!-- Desktop Toggle -->
-                    <button @click="toggleSidebar" class="hidden lg:flex btn btn-ghost btn-sm">
+                    <button @click="toggleSidebar" class="hidden lg:flex btn btn-ghost btn-sm btn-square">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
@@ -50,14 +47,18 @@
                     <div v-for="item in menuItems" :key="item.id" class="relative">
                         <button @click="selectMenuItem(item)" :class="[
                             'w-full flex items-center rounded-lg transition-colors duration-200',
-                            isSidebarOpen ? 'space-x-3 px-3 py-2' : 'justify-center py-3',
+                            'space-x-3 px-3 py-2',
+                            { 'lg:justify-center lg:py-3 lg:px-0': !isSidebarOpen },
                             activeMenuItem === item.id
                                 ? 'bg-primary text-primary-content'
                                 : 'text-base-content hover:bg-base-200'
                         ]">
                             <div class="w-5 h-5 flex-shrink-0" v-html="item.icon"></div>
                             <transition name="fade">
-                                <span v-if="isSidebarOpen" class="text-sm font-medium">
+                                <span :class="[
+                                    'text-sm font-medium',
+                                    { 'lg:hidden': !isSidebarOpen }
+                                ]">
                                     {{ item.name }}
                                 </span>
                             </transition>
@@ -76,7 +77,7 @@
                             </div>
                         </div>
                         <transition name="fade">
-                            <div v-if="isSidebarOpen" class="flex-1 min-w-0">
+                            <div :class="['flex-1 min-w-0', { 'lg:hidden': !isSidebarOpen }]">
                                 <p class="text-sm font-medium text-base-content truncate">{{ user?.user_metadata.name }}
                                 </p>
                                 <p class="text-xs text-base-content/70 truncate">{{ user?.user_metadata.email }}</p>
@@ -90,8 +91,9 @@
         <!-- Main Content -->
         <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <!-- Header -->
-            <header class="bg-base-100 shadow-sm border-b border-base-300 p-4 flex-shrink-0">
-                <div class="flex items-center justify-between">
+            <header
+                class="bg-base-100 shadow-sm border-b border-base-300 flex-shrink-0 h-[65px] flex items-center w-full justify-between px-2">
+                <div class="flex items-center justify-between w-full">
                     <div class="flex items-center space-x-4">
                         <!-- Mobile Menu Toggle -->
                         <button @click="toggleMobileMenu" class="lg:hidden btn btn-ghost btn-sm">
@@ -109,7 +111,7 @@
                     <!-- Header Actions -->
                     <div class="flex items-center space-x-2">
                         <ThemeController />
-                        <button @click="handleSignOut" :disabled="isSigningOut" class="btn btn-ghost btn-xs">
+                        <button @click="handleSignOut" :disabled="isSigningOut" class="btn btn-ghost btn-sm">
                             <span>{{ isSigningOut ? 'Signing out...' : 'Sign out' }}</span>
                         </button>
                     </div>
@@ -153,17 +155,17 @@ const menuItems: MenuItem[] = [
     {
         id: 'categories',
         name: 'Categories',
-        icon: '<svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 2a6 6 0 110 12A6 6 0 0110 4zM7.293 9.293a1 1 0 011.414-1.414l2.586 2.586a1 1 0 010 1.414l-2.586 2.586a1 1 0 01-1.414-1.414L9.586 11H5a1 1 0 110-2h4.586L7.293 9.293z"/></svg>'
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><path fill="currentColor" d="M6.5 11L12 2l5.5 9zm11 11q-1.875 0-3.187-1.312T13 17.5t1.313-3.187T17.5 13t3.188 1.313T22 17.5t-1.312 3.188T17.5 22M3 21.5v-8h8v8z"/></svg>'
     },
     {
         id: 'profile',
         name: 'Profile',
-        icon: '<svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 2a6 6 0 110 12A6 6 0 0110 4zM4.293 15.707A1 1 0 015.414 14H14.586a1 1 0 01.707.293l2.586-2.586A1.5 1.5 0 0017.5 10h-15a1.5 1.5 0 00-1.5 1.5v3a1.5 1.5 0 001.5 1.5h3a1.5 1.5 0 001.5-1.5v-3a1.5 1.5 0 00-1.207-1.465L4.293 15.707z"/></svg>'
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 4a8 8 0 0 0-6.96 11.947A4.99 4.99 0 0 1 9 14h6a4.99 4.99 0 0 1 3.96 1.947A8 8 0 0 0 12 4m7.943 14.076q.188-.245.36-.502A9.96 9.96 0 0 0 22 12c0-5.523-4.477-10-10-10S2 6.477 2 12a9.96 9.96 0 0 0 2.057 6.076l-.005.018l.355.413A9.98 9.98 0 0 0 12 22q.324 0 .644-.02a9.95 9.95 0 0 0 5.031-1.745a10 10 0 0 0 1.918-1.728l.355-.413zM12 6a3 3 0 1 0 0 6a3 3 0 0 0 0-6" clip-rule="evenodd"/></svg>'
     },
     {
         id: 'reports',
         name: 'Reports',
-        icon: '<svg fill="currentColor" viewBox="0 0 20 20"><path d="M3.1727,17 L16,17 C17,17,18,16,18,15 L18,4 C18,3,17,2,16,2 L4,2 C3,2,2,3,2,4 L2,15 C2,16,3,17,4,17 L3.1727,17 Z M4,4 L16,4 L16,15 L4,15 L4,4 Z M6,6 L8,6 L8,8 L6,8 L6,6 Z M10,6 L14,6 L14,8 L10,8 L10,6 Z M6,10 L14,10 L14,12 L6,12 L6,10 Z"/></svg>'
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><path fill="currentColor" d="M17.45 15.18L22 7.31V21H2V3h2v12.54L9.5 6L16 9.78l4.24-7.33l1.73 1l-5.23 9.05l-6.51-3.75L4.31 19h2.26l4.39-7.56z"/></svg>'
     },
     {
         id: 'settings',

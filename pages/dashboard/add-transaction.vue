@@ -92,7 +92,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-    <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
+    <div class="max-w-2xl mx-auto p-6 bg-base-100 rounded-lg shadow">
         <h1 class="text-2xl font-bold mb-6">Add New Transaction</h1>
 
         <form @submit.prevent="handleSubmit" class="space-y-6">

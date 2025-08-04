@@ -213,7 +213,7 @@ definePageMeta({
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="stat bg-white shadow rounded-lg">
+            <div class="stat bg-base-100 shadow rounded-lg">
                 <div class="stat-title">Total Income</div>
                 <div class="stat-value text-success">{{ stats.totalIncome.toLocaleString('id-ID', {
                     style: 'currency',
@@ -222,7 +222,7 @@ definePageMeta({
                     maximumFractionDigits: 0
                 }) }}</div>
             </div>
-            <div class="stat bg-white shadow rounded-lg">
+            <div class="stat bg-base-100 shadow rounded-lg">
                 <div class="stat-title">Total Expenses</div>
                 <div class="stat-value text-error">{{ stats.totalExpense.toLocaleString('id-ID', {
                     style: 'currency',
@@ -231,7 +231,7 @@ definePageMeta({
                     maximumFractionDigits: 0
                 }) }}</div>
             </div>
-            <div class="stat bg-white shadow rounded-lg">
+            <div class="stat bg-base-100 shadow rounded-lg">
                 <div class="stat-title">Balance</div>
                 <div class="stat-value" :class="stats.balance >= 0 ? 'text-success' : 'text-error'">
                     {{ stats.balance.toLocaleString('id-ID', {
@@ -245,16 +245,16 @@ definePageMeta({
         </div>
 
         <!-- Filters -->
-        <div class="bg-white p-4 rounded-lg shadow mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="form-control">
+        <div class="bg-base-100 p-4 rounded-lg shadow mb-6">
+            <div class="flex xl:flex-row flex-col items-center gap-4">
+                <div class="form-control w-full">
                     <label class="label">Date Range</label>
-                    <div class="flex gap-2">
+                    <div class="flex xl:flex-row flex-col gap-2">
                         <input type="date" v-model="dateRange.start" class="input input-bordered w-full" />
                         <input type="date" v-model="dateRange.end" class="input input-bordered w-full" />
                     </div>
                 </div>
-                <div class="form-control">
+                <div class="form-control w-full">
                     <label class="label">Type</label>
                     <select v-model="typeFilter" class="select select-bordered w-full">
                         <option value="all">Semua</option>
@@ -262,7 +262,7 @@ definePageMeta({
                         <option value="expense">Pengeluaran</option>
                     </select>
                 </div>
-                <div class="form-control">
+                <div class="form-control w-full">
                     <label class="label">Category</label>
                     <select v-model="categoryFilter" class="select select-bordered w-full">
                         <option :value="null">All Categories</option>
@@ -271,7 +271,7 @@ definePageMeta({
                         </option>
                     </select>
                 </div>
-                <div class="form-control">
+                <div class="form-control w-full">
                     <label class="label opacity-0">Actions</label>
                     <button class="btn btn-ghost" @click="resetFilters">Reset Filters</button>
                 </div>
@@ -279,7 +279,7 @@ definePageMeta({
         </div>
 
         <!-- Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-base-100 rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="table w-full">
                     <thead>

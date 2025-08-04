@@ -191,7 +191,7 @@ definePageMeta({
         </div>
 
         <!-- Categories Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-base-100 rounded-lg shadow overflow-hidden">
             <table class="table w-full">
                 <thead>
                     <tr>

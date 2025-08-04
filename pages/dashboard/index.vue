@@ -256,7 +256,7 @@ const categoryDistributionOption = computed(() => ({
                         currency: 'IDR',
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
-                        }) }}</div>
+                    }) }}</div>
                     <div class="stat-desc">Net balance from income and expenses</div>
                 </div>
 
@@ -268,7 +268,7 @@ const categoryDistributionOption = computed(() => ({
                         currency: 'IDR',
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
-                        }) }}</div>
+                    }) }}</div>
                     <div class="stat-desc">Monthly average spending</div>
                 </div>
 
@@ -280,7 +280,7 @@ const categoryDistributionOption = computed(() => ({
                         currency: 'IDR',
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
-                        }) }}</div>
+                    }) }}</div>
                     <div class="stat-desc">Monthly average earnings</div>
                 </div>
             </div>
@@ -308,7 +308,7 @@ const categoryDistributionOption = computed(() => ({
             <div class="bg-base-100 p-6 rounded-box shadow">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Recent Transactions</h3>
-                    <NuxtLink to="/dashboard/transactions" class="btn btn-primary btn-sm">View All</NuxtLink>
+                    <NuxtLink to="/dashboard/reports" class="btn btn-primary btn-sm">View All</NuxtLink>
                 </div>
                 <!-- Add your transactions table/list here -->
                 <div class="overflow-x-auto">
