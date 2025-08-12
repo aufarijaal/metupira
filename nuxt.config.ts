@@ -45,4 +45,5 @@ export default defineNuxtConfig({
   fonts: {
     families: [{ name: "Inter", provider: "google" }],
   },
+  echarts: {},
 });

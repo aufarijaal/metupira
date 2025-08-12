@@ -36,6 +36,9 @@ const categories = ref<Category[]>([])
 const filteredCategories = computed(() =>
     categories.value.filter(cat => cat.type === form.value.type)
 )
+const showAlert = ref(false)
+const alertMessage = ref('')
+const alertType = ref<'info' | 'success' | 'warning' | 'error'>('success')
 
 // Fetch categories on component mount
 const fetchCategories = async () => {
@@ -81,92 +84,116 @@ const handleSubmit = async () => {
 
         if (dbError) throw dbError
 
-        // Redirect to dashboard after successful submission
-        router.push('/dashboard')
+        alertMessage.value = 'Transaction added successfully!'
+        alertType.value = 'info'
+        showAlert.value = true
+
+        // Reset form
+        form.value = {
+            type: 'expense',
+            amount: 0,
+            category_id: 0,
+            note: '',
+            transaction_at: new Date().toISOString().slice(0, 16)
+        }
     } catch (e: any) {
         error.value = e.message
+
+        alertMessage.value = 'Error: ' + e.message
+        alertType.value = 'error'
     } finally {
         loading.value = false
+        setTimeout(() => {
+            showAlert.value = false
+            alertMessage.value = ''
+            alertType.value = 'info'
+            // Optionally redirect or reset state
+            // router.push('/dashboard/transactions')
+        }, 3000)
     }
 }
 </script>
 
 <template>
-    <div class="max-w-2xl mx-auto p-6 bg-base-100 rounded-lg shadow">
-        <h1 class="text-2xl font-bold mb-6">Add New Transaction</h1>
+    <div class="max-w-2xl mx-auto space-y-2">
+        <Alert :message="alertMessage" :type="alertType" v-if="showAlert" />
 
-        <form @submit.prevent="handleSubmit" class="space-y-6">
-            <!-- Transaction Type -->
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">Transaction Type</span>
-                </label>
-                <div class="flex gap-4">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" v-model="form.type" value="expense" class="radio" />
-                        <span>Expense</span>
+        <div class="p-6 bg-base-100 rounded-lg shadow">
+            <h1 class="text-2xl font-bold mb-6">Add New Transaction</h1>
+
+            <form @submit.prevent="handleSubmit" class="space-y-6">
+                <!-- Transaction Type -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Transaction Type</span>
                     </label>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" v-model="form.type" value="income" class="radio" />
-                        <span>Income</span>
+                    <div class="flex gap-4">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" v-model="form.type" value="expense" class="radio" />
+                            <span>Expense</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" v-model="form.type" value="income" class="radio" />
+                            <span>Income</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Amount -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Amount</span>
                     </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2">Rp.</span>
+                        <input type="number" v-model="form.amount" step="0.01" min="0" required
+                            class="input input-bordered pl-10 w-full" />
+                    </div>
                 </div>
-            </div>
 
-            <!-- Amount -->
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">Amount</span>
-                </label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2">Rp.</span>
-                    <input type="number" v-model="form.amount" step="0.01" min="0" required
-                        class="input input-bordered pl-10 w-full" />
+                <!-- Category -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Category</span>
+                    </label>
+                    <select v-model="form.category_id" class="select select-bordered w-full" required>
+                        <option :value="0">Select a category</option>
+                        <option v-for="category in filteredCategories" :key="category.id" :value="category.id">
+                            {{ category.name }}
+                        </option>
+                    </select>
                 </div>
-            </div>
 
-            <!-- Category -->
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">Category</span>
-                </label>
-                <select v-model="form.category_id" class="select select-bordered w-full" required>
-                    <option :value="0">Select a category</option>
-                    <option v-for="category in filteredCategories" :key="category.id" :value="category.id">
-                        {{ category.name }}
-                    </option>
-                </select>
-            </div>
+                <!-- Note -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Note</span>
+                    </label>
+                    <input type="text" v-model="form.note" class="input input-bordered w-full" required />
+                </div>
 
-            <!-- Note -->
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">Note</span>
-                </label>
-                <input type="text" v-model="form.note" class="input input-bordered w-full" required />
-            </div>
+                <!-- Transaction Date and Time -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Date and Time</span>
+                    </label>
+                    <input type="datetime-local" v-model="form.transaction_at" class="input input-bordered w-full"
+                        required />
+                </div>
 
-            <!-- Transaction Date and Time -->
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">Date and Time</span>
-                </label>
-                <input type="datetime-local" v-model="form.transaction_at" class="input input-bordered w-full"
-                    required />
-            </div>
+                <!-- Error Message -->
+                <div v-if="error" class="alert alert-error">
+                    {{ error }}
+                </div>
 
-            <!-- Error Message -->
-            <div v-if="error" class="alert alert-error">
-                {{ error }}
-            </div>
-
-            <!-- Submit Button -->
-            <div class="form-control">
-                <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-                    <span v-if="loading">Adding...</span>
-                    <span v-else>Add Transaction</span>
-                </button>
-            </div>
-        </form>
+                <!-- Submit Button -->
+                <div class="form-control">
+                    <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+                        <span v-if="loading">Adding...</span>
+                        <span v-else>Add Transaction</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </template>

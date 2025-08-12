@@ -4,10 +4,10 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    getFilteredRowModel,
-    type ColumnDef
+    FlexRender,
 } from '@tanstack/vue-table'
-import { ref, onMounted, computed } from 'vue'
+import type { ColumnDef } from '@tanstack/table-core'
+import { ref, onMounted } from 'vue'
 
 interface Transaction {
     id: number
@@ -24,15 +24,6 @@ interface Transaction {
 const transactions = ref<Transaction[]>([])
 const loading = ref(true)
 const error = ref('')
-
-// Filter state
-const dateRange = ref({
-    start: '',
-    end: ''
-})
-const typeFilter = ref<'all' | 'income' | 'expense'>('all')
-const categoryFilter = ref<number | null>(null)
-const categories = ref<{ id: number; name: string }[]>([])
 
 const supabase = useSupabaseClient()
 
@@ -64,21 +55,6 @@ const fetchTransactions = async () => {
         error.value = 'Failed to load transactions: ' + e.message
     } finally {
         loading.value = false
-    }
-}
-
-// Fetch categories for filter
-const fetchCategories = async () => {
-    try {
-        const { data, error: dbError } = await supabase
-            .from('categories')
-            .select('id, name')
-            .order('name')
-
-        if (dbError) throw dbError
-        categories.value = data || []
-    } catch (e: any) {
-        error.value = 'Failed to load categories: ' + e.message
     }
 }
 
@@ -122,8 +98,8 @@ const columns: ColumnDef<Transaction>[] = [
     },
     {
         accessorKey: 'note',
-        header: 'Note'
-    }
+        header: 'Note',
+    },
 ]
 
 // Create table instance
@@ -133,68 +109,18 @@ const table = useVueTable({
     },
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    initialState: {
-        pagination: {
-            pageSize: 10
-        }
-    }
+    // getPaginationRowModel: getPaginationRowModel(),
+    // getSortedRowModel: getSortedRowModel(),
+    // initialState: {
+    //     pagination: {
+    //         pageSize: 10
+    //     }
+    // }
 })
-
-// Filter functions
-const applyFilters = () => {
-    let filtered = [...transactions.value]
-
-    if (typeFilter.value !== 'all') {
-        filtered = filtered.filter(t => t.type === typeFilter.value)
-    }
-
-    if (categoryFilter.value) {
-        filtered = filtered.filter(t => t.category_id === categoryFilter.value)
-    }
-
-    if (dateRange.value.start && dateRange.value.end) {
-        const start = new Date(dateRange.value.start)
-        const end = new Date(dateRange.value.end)
-        filtered = filtered.filter(t => {
-            const date = new Date(t.transaction_at)
-            return date >= start && date <= end
-        })
-    }
-
-    return filtered
-}
-
-// Stats
-const stats = computed(() => {
-    const filtered = applyFilters()
-    const totalIncome = filtered
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
-    const totalExpense = filtered
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
-
-    return {
-        totalIncome,
-        totalExpense,
-        balance: totalIncome - totalExpense
-    }
-})
-
-// Reset filters
-const resetFilters = () => {
-    dateRange.value = { start: '', end: '' }
-    typeFilter.value = 'all'
-    categoryFilter.value = null
-}
 
 // Initialize
 onMounted(() => {
     fetchTransactions()
-    fetchCategories()
 })
 
 definePageMeta({
@@ -204,136 +130,46 @@ definePageMeta({
 
 <template>
     <div class="p-6">
-        <h1 class="text-2xl font-bold mb-6">Transaction Reports</h1>
+        <h1 class="text-2xl font-bold mb-6">All Transactions</h1>
 
         <!-- Error Alert -->
         <div v-if="error" class="alert alert-error mb-4">
             {{ error }}
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="stat bg-base-100 shadow rounded-lg">
-                <div class="stat-title">Total Income</div>
-                <div class="stat-value text-success">{{ stats.totalIncome.toLocaleString('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                }) }}</div>
-            </div>
-            <div class="stat bg-base-100 shadow rounded-lg">
-                <div class="stat-title">Total Expenses</div>
-                <div class="stat-value text-error">{{ stats.totalExpense.toLocaleString('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                }) }}</div>
-            </div>
-            <div class="stat bg-base-100 shadow rounded-lg">
-                <div class="stat-title">Balance</div>
-                <div class="stat-value" :class="stats.balance >= 0 ? 'text-success' : 'text-error'">
-                    {{ stats.balance.toLocaleString('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                    }) }}
-                </div>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="bg-base-100 p-4 rounded-lg shadow mb-6">
-            <div class="flex xl:flex-row flex-col items-center gap-4">
-                <div class="form-control w-full">
-                    <label class="label">Date Range</label>
-                    <div class="flex xl:flex-row flex-col gap-2">
-                        <input type="date" v-model="dateRange.start" class="input input-bordered w-full" />
-                        <input type="date" v-model="dateRange.end" class="input input-bordered w-full" />
-                    </div>
-                </div>
-                <div class="form-control w-full">
-                    <label class="label">Type</label>
-                    <select v-model="typeFilter" class="select select-bordered w-full">
-                        <option value="all">Semua</option>
-                        <option value="income">Pemasukan</option>
-                        <option value="expense">Pengeluaran</option>
-                    </select>
-                </div>
-                <div class="form-control w-full">
-                    <label class="label">Category</label>
-                    <select v-model="categoryFilter" class="select select-bordered w-full">
-                        <option :value="null">All Categories</option>
-                        <option v-for="category in categories" :key="category.id" :value="category.id">
-                            {{ category.name }}
-                        </option>
-                    </select>
-                </div>
-                <div class="form-control w-full">
-                    <label class="label opacity-0">Actions</label>
-                    <button class="btn btn-ghost" @click="resetFilters">Reset Filters</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Table -->
-        <div class="bg-base-100 rounded-lg shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="table w-full">
-                    <thead>
-                        <tr>
-                            <th v-for="column in table.getAllColumns()" :key="column.id"
-                                :class="{ 'cursor-pointer select-none': column.getCanSort() }"
-                                @click="column.getToggleSortingHandler()">
-                                {{ column.columnDef.header as string }}
-                                <span v-if="column.getCanSort()">
-                                    {{ {
-                                        asc: ' 🔼',
-                                        desc: ' 🔽',
-                                    }[column.getIsSorted() as string] ?? ' ↕️' }}
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-if="loading">
-                            <td colspan="5" class="text-center py-4">Loading...</td>
-                        </tr>
-                        <tr v-else v-for="row in table.getRowModel().rows" :key="row.id">
-                            <td v-for="cell in row.getVisibleCells()" :key="cell.id">
-                                {{ cell.getValue() }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="overflow-x-auto">
+            <table
+                class="table table-xs table-zebra w-full border-2 border-[var(--fallback-bc,oklch(var(--bc)/0.2))] [&_td]:border [&_td]:border-[var(--fallback-bc,oklch(var(--bc)/0.2))] [&_th]:border [&_th]:border-[var(--fallback-bc,oklch(var(--bc)/0.2))]">
+                <thead>
+                    <tr>
+                        <th v-for="column in table.getHeaderGroups()[0].headers" :key="column.id">
+                            {{ column.column.columnDef.header }}
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="hover" v-for="row in table.getRowModel().rows" :key="row.id">
+                        <td v-for="cell in row.getVisibleCells()" :key="cell.id">
+                            {{ cell.renderValue() }}
+                        </td>
+                        <!-- actions -->
+                        <td>
+                            <div class="flex gap-2">
+                                <NuxtLink :to="`/dashboard/edit-transaction/${row.original.id}`"
+                                    class="btn btn-xs btn-primary">
+                                    Edit
+                                </NuxtLink>
+                                <button @click="() => { }" class="btn btn-xs btn-error">
+                                    Delete
+                                </button>
+                            </div>
 
-            <!-- Pagination -->
-            <div class="flex items-center justify-between p-4 border-t">
-                <div class="flex items-center gap-2">
-                    <select v-model="table.getState().pagination.pageSize" class="select select-bordered select-sm">
-                        <option value="5">5 per page</option>
-                        <option value="10">10 per page</option>
-                        <option value="20">20 per page</option>
-                        <option value="50">50 per page</option>
-                    </select>
-                    <span class="text-sm text-gray-600">
-                        Page {{ table.getState().pagination.pageIndex + 1 }} of
-                        {{ table.getPageCount() }}
-                    </span>
-                </div>
-                <div class="join">
-                    <button class="join-item btn btn-sm" :disabled="!table.getCanPreviousPage()"
-                        @click="table.previousPage()">
-                        Previous
-                    </button>
-                    <button class="join-item btn btn-sm" :disabled="!table.getCanNextPage()" @click="table.nextPage()">
-                        Next
-                    </button>
-                </div>
-            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>

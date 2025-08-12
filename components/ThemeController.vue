@@ -1,38 +1,5 @@
 <script setup lang="ts">
-const themes = [
-    "light",
-    "dark",
-    "cupcake",
-    "bumblebee",
-    "emerald",
-    "corporate",
-    "synthwave",
-    "retro",
-    "cyberpunk",
-    "valentine",
-    "halloween",
-    "garden",
-    "forest",
-    "aqua",
-    "lofi",
-    "pastel",
-    "fantasy",
-    "wireframe",
-    "black",
-    "luxury",
-    "dracula",
-    "cmyk",
-    "autumn",
-    "business",
-    "acid",
-    "lemonade",
-    "night",
-    "coffee",
-    "winter",
-    "dim",
-    "nord",
-    "sunset",
-]
+import { themes } from "~/constants"
 </script>
 
 <template>
@@ -84,15 +51,10 @@ const themes = [
         </div>
         <ul tabindex="0"
             class="dropdown-content bg-base-300 rounded-box z-[1] w-52 p-2 shadow-2xl max-h-[200px] overflow-y-auto">
-            <li>
+            <li v-for="theme in themes" :key="theme.name">
                 <input type="radio" name="theme-dropdown"
-                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="Default"
-                    value="default" data-set-theme="default" />
-            </li>
-            <li v-for="theme in themes" :key="theme">
-                <input type="radio" name="theme-dropdown"
-                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start" :aria-label="theme"
-                    :value="theme" :data-set-theme="theme">
+                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start" :aria-label="theme.text"
+                    :value="theme.name" :data-set-theme="theme.name">
             </li>
         </ul>
     </div>

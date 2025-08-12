@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import 'echarts'
 
 definePageMeta({
     title: 'Dashboard',
@@ -31,6 +32,7 @@ interface Transaction {
 const transactions = ref<Transaction[]>([])
 const loading = ref(true)
 const error = ref('')
+const selectedRange = ref<'daily' | 'weekly' | 'monthly'>('monthly')
 
 // Function to fetch transactions
 const fetchTransactions = async () => {
@@ -52,6 +54,57 @@ const fetchTransactions = async () => {
     } finally {
         loading.value = false
     }
+}
+
+// Function to group transactions by date range
+const groupTransactionsByRange = (range: 'daily' | 'weekly' | 'monthly') => {
+    const grouped = new Map()
+    const now = new Date()
+    let numberOfPeriods = range === 'daily' ? 30 : range === 'weekly' ? 12 : 12
+
+    // Initialize periods
+    for (let i = 0; i < numberOfPeriods; i++) {
+        let date = new Date()
+        if (range === 'daily') {
+            date.setDate(now.getDate() - i)
+        } else if (range === 'weekly') {
+            date.setDate(now.getDate() - (i * 7))
+        } else {
+            date.setMonth(now.getMonth() - i)
+        }
+
+        grouped.set(date.toISOString().split('T')[0], {
+            date,
+            income: 0,
+            expense: 0
+        })
+    }
+
+    // Group transactions
+    transactions.value.forEach(transaction => {
+        const date = new Date(transaction.transaction_at)
+        let key = date.toISOString().split('T')[0]
+
+        if (range === 'weekly') {
+            // Get the monday of the week
+            const day = date.getDay()
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1)
+            key = new Date(date.setDate(diff)).toISOString().split('T')[0]
+        } else if (range === 'monthly') {
+            key = date.toISOString().slice(0, 7)
+        }
+
+        if (grouped.has(key)) {
+            const amount = transaction.amount
+            if (transaction.type === 'income') {
+                grouped.get(key).income += amount
+            } else {
+                grouped.get(key).expense += amount
+            }
+        }
+    })
+
+    return Array.from(grouped.values()).reverse()
 }
 
 // Computed monthly data
@@ -88,58 +141,70 @@ const monthlyData = computed(() => {
 const monthlyExpenses = computed(() => monthlyData.value.map(d => d.expense))
 const monthlyIncome = computed(() => monthlyData.value.map(d => d.income))
 
-// Computed category distribution
-const categoryDistribution = computed(() => {
-    const categories: { [key: string]: number } = {}
-
-    transactions.value
-        .filter(t => t.type === 'expense')
-        .forEach(transaction => {
-            const categoryName = transaction.categories?.name || 'Uncategorized'
-            categories[categoryName] = (categories[categoryName] || 0) + transaction.amount
-        })
-
-    return Object.entries(categories).map(([name, value]) => ({
-        name,
-        value
-    }))
-})
-
 // Stats
-const totalBalance = computed(() => {
-    return transactions.value.reduce((total, t) => {
-        return total + (t.type === 'income' ? t.amount : -t.amount)
-    }, 0)
-})
+const stats = computed(() => {
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
 
-const monthlyAverageExpense = computed(() => {
-    const totalExpenses = transactions.value
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0)
+    const totals = transactions.value.reduce((acc, t) => {
+        // All time stats
+        if (t.type === 'income') {
+            acc.totalIncome += t.amount
+        } else {
+            acc.totalExpense += t.amount
+        }
 
-    const monthCount = monthlyData.value.filter(m => m.expense > 0).length || 1
-    return Math.round(totalExpenses / monthCount)
-})
+        // This month stats
+        const transDate = new Date(t.transaction_at)
+        if (transDate.getMonth() === currentMonth && transDate.getFullYear() === currentYear) {
+            if (t.type === 'income') {
+                acc.thisMonthIncome += t.amount
+            } else {
+                acc.thisMonthExpense += t.amount
+            }
+        }
 
-const monthlyAverageIncome = computed(() => {
-    const totalIncome = transactions.value
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + t.amount, 0)
+        return acc
+    }, {
+        totalIncome: 0,
+        totalExpense: 0,
+        thisMonthIncome: 0,
+        thisMonthExpense: 0
+    })
 
-    const monthCount = monthlyData.value.filter(m => m.income > 0).length || 1
-    return Math.round(totalIncome / monthCount)
+    return {
+        ...totals,
+        balance: totals.totalIncome - totals.totalExpense,
+        thisMonthBalance: totals.thisMonthIncome - totals.thisMonthExpense
+    }
 })
 
 // Chart options
+const chartData = computed(() => {
+    const data = groupTransactionsByRange(selectedRange.value)
+    return {
+        dates: data.map(d => {
+            if (selectedRange.value === 'daily') {
+                return new Date(d.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+            } else if (selectedRange.value === 'weekly') {
+                return `Minggu ${new Date(d.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`
+            } else {
+                return new Date(d.date).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+            }
+        }),
+        income: data.map(d => d.income),
+        expense: data.map(d => d.expense)
+    }
+})
+
 const expenseVsIncomeOption = computed(() => ({
     tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'cross' },
         formatter: (params: any) => {
-            const date = new Date(monthlyData.value[params[0].dataIndex].month)
-            const monthYear = date.toLocaleString('id-ID', { month: 'long', year: 'numeric' })
-
-            return `${monthYear}<br/>${params.map((param: any) => {
+            const date = chartData.value.dates[params[0].dataIndex]
+            return `${date}<br/>${params.map((param: any) => {
                 const value = param.value.toLocaleString('id-ID', {
                     style: 'currency',
                     currency: 'IDR',
@@ -151,19 +216,22 @@ const expenseVsIncomeOption = computed(() => ({
         }
     },
     legend: {
-        data: ['Pengeluaran', 'Pemasukan']
+        data: ['Pengeluaran', 'Pemasukan'],
+        top: 0
     },
     grid: {
         left: '3%',
         right: '4%',
         bottom: '3%',
-        containLabel: true
+        containLabel: true,
+        top: 30
     },
     xAxis: {
         type: 'category',
-        data: monthlyData.value.map(d =>
-            new Date(d.month).toLocaleString('id-ID', { month: 'short' })
-        )
+        data: chartData.value.dates,
+        axisLabel: {
+            rotate: selectedRange.value === 'monthly' ? 0 : 45
+        }
     },
     yAxis: {
         type: 'value',
@@ -183,54 +251,67 @@ const expenseVsIncomeOption = computed(() => ({
         {
             name: 'Pengeluaran',
             type: 'line',
-            data: monthlyExpenses.value,
-            smooth: true,
-            lineStyle: { width: 3 },
+            data: chartData.value.expense,
             itemStyle: { color: '#ef4444' }
         },
         {
             name: 'Pemasukan',
             type: 'line',
-            data: monthlyIncome.value,
-            smooth: true,
-            lineStyle: { width: 3 },
+            data: chartData.value.income,
             itemStyle: { color: '#22c55e' }
         }
     ]
 }))
 
-const categoryDistributionOption = computed(() => ({
-    tooltip: {
-        trigger: 'item',
-        formatter: (params: any) => {
-            const value = params.value.toLocaleString('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            })
-            return `${params.name}: ${value} (${params.percent}%)`
-        }
-    },
-    legend: {
-        orient: 'vertical',
-        left: 'left'
-    },
-    series: [
-        {
-            type: 'pie',
-            radius: '70%',
-            data: categoryDistribution.value,
-            emphasis: {
-                itemStyle: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                }
-            }
-        }
-    ]
-}))
+// const option = ref<ECOption>({
+//     dataset: {
+//         dimensions: ['Product', '2015', '2016', '2017'],
+//         source: [
+//             {
+//                 Product: 'Matcha Latte',
+//                 2015: 54,
+//                 2016: 42,
+//                 2017: 23,
+//             },
+//         ],
+//     },
+//     xAxis: { type: 'category' },
+//     yAxis: {},
+//     series: [{ type: 'bar' }],
+// })
+
+// const categoryDistributionOption = computed(() => ({
+//     tooltip: {
+//         trigger: 'item',
+//         formatter: (params: any) => {
+//             const value = params.value.toLocaleString('id-ID', {
+//                 style: 'currency',
+//                 currency: 'IDR',
+//                 minimumFractionDigits: 0,
+//                 maximumFractionDigits: 0
+//             })
+//             return `${params.name}: ${value} (${params.percent}%)`
+//         }
+//     },
+//     legend: {
+//         orient: 'vertical',
+//         left: 'left'
+//     },
+//     series: [
+//         {
+//             type: 'pie',
+//             radius: '70%',
+//             data: categoryDistribution.value,
+//             emphasis: {
+//                 itemStyle: {
+//                     shadowBlur: 10,
+//                     shadowOffsetX: 0,
+//                     shadowColor: 'rgba(0, 0, 0, 0.5)'
+//                 }
+//             }
+//         }
+//     ]
+// }))
 </script>
 
 <template>
@@ -247,102 +328,105 @@ const categoryDistributionOption = computed(() => ({
 
         <template v-else>
             <!-- Stats Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Total Balance -->
                 <div class="stat bg-base-100 rounded-box shadow">
-                    <div class="stat-title">Total Balance</div>
-                    <div class="stat-value text-primary">{{ totalBalance.toLocaleString('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                    }) }}</div>
-                    <div class="stat-desc">Net balance from income and expenses</div>
+                    <div class="stat-title">Saldo Total</div>
+                    <div class="stat-value" :class="stats.balance >= 0 ? 'text-success' : 'text-error'">
+                        {{ stats.balance.toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }) }}
+                    </div>
+                    <div class="stat-desc">Seluruh Waktu</div>
                 </div>
 
-                <!-- Average Monthly Expense -->
+                <!-- This Month Balance -->
                 <div class="stat bg-base-100 rounded-box shadow">
-                    <div class="stat-title">Average Monthly Expense</div>
-                    <div class="stat-value text-error">{{ monthlyAverageExpense.toLocaleString('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                    }) }}</div>
-                    <div class="stat-desc">Monthly average spending</div>
+                    <div class="stat-title">Saldo Bulan Ini</div>
+                    <div class="stat-value" :class="stats.thisMonthBalance >= 0 ? 'text-success' : 'text-error'">
+                        {{ stats.thisMonthBalance.toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }) }}
+                    </div>
+                    <div class="stat-desc">{{ new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' }) }}
+                    </div>
                 </div>
 
-                <!-- Average Monthly Income -->
+                <!-- Total Income -->
                 <div class="stat bg-base-100 rounded-box shadow">
-                    <div class="stat-title">Average Monthly Income</div>
-                    <div class="stat-value text-success">{{ monthlyAverageIncome.toLocaleString('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                    }) }}</div>
-                    <div class="stat-desc">Monthly average earnings</div>
+                    <div class="stat-title">Total Pemasukan</div>
+                    <div class="stat-value text-success">
+                        {{ stats.totalIncome.toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }) }}
+                    </div>
+                    <div class="stat-desc">
+                        Bulan Ini: {{ stats.thisMonthIncome.toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }) }}
+                    </div>
+                </div>
+
+                <!-- Total Expense -->
+                <div class="stat bg-base-100 rounded-box shadow">
+                    <div class="stat-title">Total Pengeluaran</div>
+                    <div class="stat-value text-error">
+                        {{ stats.totalExpense.toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }) }}
+                    </div>
+                    <div class="stat-desc">
+                        Bulan Ini: {{ stats.thisMonthExpense.toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }) }}
+                    </div>
                 </div>
             </div>
 
             <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6">
                 <!-- Income vs Expenses Chart -->
                 <div class="bg-base-100 p-6 rounded-box shadow">
-                    <h3 class="text-lg font-semibold mb-4">Income vs Expenses</h3>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Pemasukan vs Pengeluaran</h3>
+
+                        <!-- Range selector -->
+                        <select v-model="selectedRange" class="select select-bordered select-sm w-40">
+                            <option value="daily">30 Hari Terakhir</option>
+                            <option value="weekly">12 Minggu Terakhir</option>
+                            <option value="monthly">12 Bulan Terakhir</option>
+                        </select>
+                    </div>
                     <ClientOnly>
                         <v-chart class="w-full h-[400px]" :option="expenseVsIncomeOption" autoresize />
                     </ClientOnly>
                 </div>
 
                 <!-- Category Distribution Chart -->
-                <div class="bg-base-100 p-6 rounded-box shadow">
+                <!-- <div class="bg-base-100 p-6 rounded-box shadow">
                     <h3 class="text-lg font-semibold mb-4">Expense Categories</h3>
                     <ClientOnly>
                         <v-chart class="w-full h-[400px]" :option="categoryDistributionOption" autoresize />
                     </ClientOnly>
-                </div>
-            </div>
-
-            <!-- Recent Transactions Preview -->
-            <div class="bg-base-100 p-6 rounded-box shadow">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Recent Transactions</h3>
-                    <NuxtLink to="/dashboard/reports" class="btn btn-primary btn-sm">View All</NuxtLink>
-                </div>
-                <!-- Add your transactions table/list here -->
-                <div class="overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2025-08-03</td>
-                                <td>Grocery Shopping</td>
-                                <td>Food</td>
-                                <td class="text-error">-Rp 1.285.000</td>
-                            </tr>
-                            <tr>
-                                <td>2025-08-02</td>
-                                <td>Salary Deposit</td>
-                                <td>Income</td>
-                                <td class="text-success">+Rp 8.500.000</td>
-                            </tr>
-                            <tr>
-                                <td>2025-08-01</td>
-                                <td>Internet Bill</td>
-                                <td>Utilities</td>
-                                <td class="text-error">-Rp 450.000</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                </div> -->
             </div>
         </template>
     </div>
