@@ -1,6 +1,34 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import 'echarts'
+// Import the echarts core module, which provides the necessary interfaces for using echarts.
+import * as echarts from 'echarts/core';
+
+// Import bar charts, all suffixed with Chart
+import { LineChart, PieChart } from 'echarts/charts';
+
+// Import the tooltip, rectangular coordinate system and dataset components
+import {
+    TooltipComponent,
+    GridComponent,
+    DatasetComponent,
+    LegendComponent,
+} from 'echarts/components';
+
+// Features like Universal Transition and Label Layout
+import { LabelLayout, UniversalTransition } from 'echarts/features';
+
+// Register the required components
+echarts.use([
+    TooltipComponent,
+    GridComponent,
+    DatasetComponent,
+    LabelLayout,
+    UniversalTransition,
+    LegendComponent,
+    LineChart,
+    PieChart
+]);
+
 
 definePageMeta({
     title: 'Dashboard',
@@ -32,7 +60,7 @@ interface Transaction {
 const transactions = ref<Transaction[]>([])
 const loading = ref(true)
 const error = ref('')
-const selectedRange = ref<'daily' | 'weekly' | 'monthly'>('monthly')
+const selectedRange = ref<'today' | 'last7days' | 'daily' | 'weekly' | 'monthly'>('daily')
 
 // Function to fetch transactions
 const fetchTransactions = async () => {
@@ -56,16 +84,66 @@ const fetchTransactions = async () => {
     }
 }
 
+// Function to filter transactions by date range
+const filterTransactionsByRange = (transactions: Transaction[], range: string) => {
+    const now = new Date()
+    now.setHours(23, 59, 59, 999) // End of today
+
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0) // Start of today
+
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(now.getDate() - 7)
+    sevenDaysAgo.setHours(0, 0, 0, 0)
+
+    return transactions.filter(t => {
+        const transactionDate = new Date(t.transaction_at)
+
+        switch (range) {
+            case 'today':
+                return transactionDate >= startOfToday && transactionDate <= now
+            case 'last7days':
+                return transactionDate >= sevenDaysAgo && transactionDate <= now
+            default:
+                return true
+        }
+    })
+}
+
 // Function to group transactions by date range
-const groupTransactionsByRange = (range: 'daily' | 'weekly' | 'monthly') => {
+const groupTransactionsByRange = (range: 'today' | 'last7days' | 'daily' | 'weekly' | 'monthly') => {
     const grouped = new Map()
     const now = new Date()
-    let numberOfPeriods = range === 'daily' ? 30 : range === 'weekly' ? 12 : 12
+    let numberOfPeriods = 1 // default for today
+
+    // Set number of periods based on range
+    switch (range) {
+        case 'today':
+            numberOfPeriods = 1
+            break
+        case 'last7days':
+            numberOfPeriods = 7
+            break
+        case 'daily':
+            numberOfPeriods = 30
+            break
+        case 'weekly':
+            numberOfPeriods = 12
+            break
+        case 'monthly':
+            numberOfPeriods = 12
+            break
+    }
 
     // Initialize periods
     for (let i = 0; i < numberOfPeriods; i++) {
         let date = new Date()
-        if (range === 'daily') {
+        if (range === 'today') {
+            // Only today
+            date = new Date(now)
+        } else if (range === 'last7days') {
+            date.setDate(now.getDate() - i)
+        } else if (range === 'daily') {
             date.setDate(now.getDate() - i)
         } else if (range === 'weekly') {
             date.setDate(now.getDate() - (i * 7))
@@ -216,8 +294,12 @@ const expenseVsIncomeOption = computed(() => ({
         }
     },
     legend: {
-        data: ['Pengeluaran', 'Pemasukan'],
-        top: 0
+        data: ['Expense', 'Income'],
+        top: 0,
+        textStyle: {
+            // red
+            color: '#333'
+        }
     },
     grid: {
         left: '3%',
@@ -249,13 +331,13 @@ const expenseVsIncomeOption = computed(() => ({
     },
     series: [
         {
-            name: 'Pengeluaran',
+            name: 'Expense',
             type: 'line',
             data: chartData.value.expense,
             itemStyle: { color: '#ef4444' }
         },
         {
-            name: 'Pemasukan',
+            name: 'Income',
             type: 'line',
             data: chartData.value.income,
             itemStyle: { color: '#22c55e' }
@@ -280,38 +362,87 @@ const expenseVsIncomeOption = computed(() => ({
 //     series: [{ type: 'bar' }],
 // })
 
-// const categoryDistributionOption = computed(() => ({
-//     tooltip: {
-//         trigger: 'item',
-//         formatter: (params: any) => {
-//             const value = params.value.toLocaleString('id-ID', {
-//                 style: 'currency',
-//                 currency: 'IDR',
-//                 minimumFractionDigits: 0,
-//                 maximumFractionDigits: 0
-//             })
-//             return `${params.name}: ${value} (${params.percent}%)`
-//         }
-//     },
-//     legend: {
-//         orient: 'vertical',
-//         left: 'left'
-//     },
-//     series: [
-//         {
-//             type: 'pie',
-//             radius: '70%',
-//             data: categoryDistribution.value,
-//             emphasis: {
-//                 itemStyle: {
-//                     shadowBlur: 10,
-//                     shadowOffsetX: 0,
-//                     shadowColor: 'rgba(0, 0, 0, 0.5)'
-//                 }
-//             }
-//         }
-//     ]
-// }))
+// Compute category distribution
+const categoryDistribution = computed(() => {
+    const categories = new Map()
+
+    // Filter transactions based on selected range
+    const filteredTransactions = filterTransactionsByRange(transactions.value, selectedRange.value)
+
+    // Only process expense transactions
+    const expenses = filteredTransactions.filter(t => t.type === 'expense')
+
+    // Group by category and sum amounts
+    expenses.forEach(transaction => {
+        const categoryName = transaction.categories.name
+        if (!categories.has(categoryName)) {
+            categories.set(categoryName, 0)
+        }
+        categories.set(categoryName, categories.get(categoryName) + transaction.amount)
+    })
+
+    // Convert to array and sort by amount
+    return Array.from(categories.entries())
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value)
+})
+
+const categoryDistributionOption = computed(() => ({
+    tooltip: {
+        trigger: 'item',
+        formatter: (params: any) => {
+            const value = params.value.toLocaleString('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            })
+            return `${params.name}: ${value} (${params.percent}%)`
+        }
+    },
+    legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'center',
+        textStyle: {
+            color: '#333'
+        }
+    },
+    series: [
+        {
+            name: 'Expense Categories',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['60%', '50%'],
+            avoidLabelOverlap: true,
+            itemStyle: {
+                borderRadius: 10,
+                borderColor: '#fff',
+                borderWidth: 2
+            },
+            label: {
+                show: false,
+                position: 'center'
+            },
+            emphasis: {
+                label: {
+                    show: true,
+                    fontSize: 16,
+                    fontWeight: 'bold'
+                },
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            },
+            labelLine: {
+                show: false
+            },
+            data: categoryDistribution.value
+        }
+    ]
+}))
 </script>
 
 <template>
@@ -328,7 +459,7 @@ const expenseVsIncomeOption = computed(() => ({
 
         <template v-else>
             <!-- Stats Overview -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Total Balance -->
                 <div class="stat bg-base-100 rounded-box shadow">
                     <div class="stat-title">Saldo Total</div>
@@ -360,7 +491,7 @@ const expenseVsIncomeOption = computed(() => ({
 
                 <!-- Total Income -->
                 <div class="stat bg-base-100 rounded-box shadow">
-                    <div class="stat-title">Total Pemasukan</div>
+                    <div class="stat-title">Total Income</div>
                     <div class="stat-value text-success">
                         {{ stats.totalIncome.toLocaleString('id-ID', {
                             style: 'currency',
@@ -381,7 +512,7 @@ const expenseVsIncomeOption = computed(() => ({
 
                 <!-- Total Expense -->
                 <div class="stat bg-base-100 rounded-box shadow">
-                    <div class="stat-title">Total Pengeluaran</div>
+                    <div class="stat-title">Total Expense</div>
                     <div class="stat-value text-error">
                         {{ stats.totalExpense.toLocaleString('id-ID', {
                             style: 'currency',
@@ -406,13 +537,15 @@ const expenseVsIncomeOption = computed(() => ({
                 <!-- Income vs Expenses Chart -->
                 <div class="bg-base-100 p-6 rounded-box shadow">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-semibold">Pemasukan vs Pengeluaran</h3>
+                        <h3 class="text-lg font-semibold">Income vs Expense</h3>
 
                         <!-- Range selector -->
                         <select v-model="selectedRange" class="select select-bordered select-sm w-40">
-                            <option value="daily">30 Hari Terakhir</option>
-                            <option value="weekly">12 Minggu Terakhir</option>
-                            <option value="monthly">12 Bulan Terakhir</option>
+                            <option value="today">Today</option>
+                            <option value="last7days">Last 7 Days</option>
+                            <option value="daily">Last 30 days</option>
+                            <option value="weekly">Last 12 weeks</option>
+                            <option value="monthly">Last 12 months</option>
                         </select>
                     </div>
                     <ClientOnly>
@@ -421,12 +554,17 @@ const expenseVsIncomeOption = computed(() => ({
                 </div>
 
                 <!-- Category Distribution Chart -->
-                <!-- <div class="bg-base-100 p-6 rounded-box shadow">
-                    <h3 class="text-lg font-semibold mb-4">Expense Categories</h3>
+                <div class="bg-base-100 p-6 rounded-box shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Expense Categories</h3>
+                        <div class="text-sm text-base-content/60">
+                            Based on selected time range
+                        </div>
+                    </div>
                     <ClientOnly>
                         <v-chart class="w-full h-[400px]" :option="categoryDistributionOption" autoresize />
                     </ClientOnly>
-                </div> -->
+                </div>
             </div>
         </template>
     </div>

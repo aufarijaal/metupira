@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const user = useSupabaseUser()
+
 const features = [
     {
         title: 'Smart Expense Tracking',
@@ -61,7 +63,11 @@ const testimonials = [
                             keuangan, dan mencapai tujuan finansial Anda.
                         </p>
                         <div class="flex gap-4">
-                            <NuxtLink to="/auth/signin" class="btn btn-secondary btn-lg">
+                            <NuxtLink v-if="user" to="/dashboard" class="btn btn-primary btn-lg">
+                                Go to dashboard
+                            </NuxtLink>
+
+                            <NuxtLink v-else to="/auth/signin" class="btn btn-secondary btn-lg">
                                 Masuk
                             </NuxtLink>
                         </div>
@@ -182,7 +188,7 @@ const testimonials = [
                                 <div class="avatar placeholder">
                                     <div class="w-12 h-12 rounded-full bg-primary text-primary-content">
                                         <span class="text-lg">{{testimonial.name.split(' ').map(n => n[0]).join('')
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </div>
                                 <div class="ml-4">
