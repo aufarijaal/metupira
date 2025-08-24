@@ -458,6 +458,9 @@ const categoryDistributionOption = computed(() => ({
         </div>
 
         <template v-else>
+            <div>
+                <AISummarize />
+            </div>
             <!-- Stats Overview -->
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Total Balance -->
