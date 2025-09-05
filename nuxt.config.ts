@@ -19,6 +19,7 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     "@nuxtjs/supabase",
     "nuxt-echarts",
+    "@vueuse/nuxt",
   ],
   postcss: {
     plugins: {

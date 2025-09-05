@@ -39,6 +39,7 @@ const filteredCategories = computed(() =>
 const showAlert = ref(false)
 const alertMessage = ref('')
 const alertType = ref<'info' | 'success' | 'warning' | 'error'>('success')
+const amountRef = ref<HTMLInputElement | null>(null)
 
 // Fetch categories on component mount
 const fetchCategories = async () => {
@@ -103,6 +104,7 @@ const handleSubmit = async () => {
         alertType.value = 'error'
     } finally {
         loading.value = false
+        amountRef.value?.focus()
         setTimeout(() => {
             showAlert.value = false
             alertMessage.value = ''
@@ -147,7 +149,7 @@ const handleSubmit = async () => {
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 transform -translate-y-1/2">Rp.</span>
                         <input type="number" v-model="form.amount" step="0.01" min="0" required
-                            class="input input-bordered pl-10 w-full" />
+                            class="input input-bordered pl-10 w-full" ref="amountRef" />
                     </div>
                 </div>
 
