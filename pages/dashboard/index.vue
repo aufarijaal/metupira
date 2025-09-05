@@ -10,7 +10,7 @@ definePageMeta({
 })
 
 const supabase = useSupabaseClient()
-const { dateRange, selectedRange } = useTransactionRange()
+const { dateRange, selectedRange, groupTransactionsByRange, filterTransactionsByRange } = useTransactionRange()
 
 // Data refs
 const transactions = ref<Transaction[]>([])
@@ -68,14 +68,15 @@ const stats = computed(() => {
 
 // Chart data preparation
 const chartData = computed<ChartData>(() => {
-    const data = useTransactionRange().groupTransactionsByRange(transactions.value, selectedRange.value)
+    const data = groupTransactionsByRange(transactions.value, selectedRange.value)
 
     return {
         dates: data.map((d: { date: Date }) => {
-            if (selectedRange.value === 'daily' || selectedRange.value === 'custom') {
-                return new Date(d.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+            // Always show day and month for daily and custom ranges
+            if (selectedRange.value === 'daily' || selectedRange.value === 'custom' || selectedRange.value === 'last7days') {
+                return new Date(d.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
             } else if (selectedRange.value === 'weekly') {
-                return `Minggu ${new Date(d.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`
+                return `Minggu ${new Date(d.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`
             } else {
                 return new Date(d.date).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
             }
@@ -88,17 +89,17 @@ const chartData = computed<ChartData>(() => {
 // Category distribution
 const categoryData = computed<CategoryData[]>(() => {
     const categories = new Map<string, number>()
-    const filteredTransactions = useTransactionRange().filterTransactionsByRange(transactions.value, selectedRange.value)
+    const filteredTransactions = filterTransactionsByRange(transactions.value, selectedRange.value)
 
     // Only process expense transactions
     const expenses = filteredTransactions.filter((t: Transaction) => t.type === 'expense')
 
     // Group by category and sum amounts
-    expenses.forEach((transaction: Transaction) => {
-        const categoryName = transaction.categories.name
+    expenses.forEach((t: Transaction) => {
+        const categoryName = t.categories.name
         categories.set(
             categoryName,
-            (categories.get(categoryName) || 0) + transaction.amount
+            (categories.get(categoryName) || 0) + t.amount
         )
     })
 

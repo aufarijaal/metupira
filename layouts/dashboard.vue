@@ -127,9 +127,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import type { MenuItem } from '~/types/menu'
+import { useRouter, useRoute } from 'vue-router'
 
 // Auth composable
 const { user, signOut: handleSignOut } = useAuth()
@@ -184,6 +185,7 @@ const toggleMobileMenu = (): void => {
 }
 
 const router = useRouter()
+const route = useRoute()
 
 const selectMenuItem = (item: MenuItem): void => {
     activeMenuItem.value = item.id
@@ -205,6 +207,19 @@ const getCurrentPageIcon = (): string => {
     const item = menuItems.find(item => item.id === activeMenuItem.value)
     return item?.icon || menuItems[0].icon
 }
+
+// Watch route changes to update activeMenuItem
+watch(
+  () => route.fullPath,
+  (newPath) => {
+    // Extract the last segment after /dashboard
+    const match = newPath.match(/\/dashboard(?:\/([^/?#]+))?/)
+    if (match) {
+      activeMenuItem.value = match[1] || 'dashboard'
+    }
+  },
+  { immediate: true }
+)
 
 // Handle window resize
 const handleResize = (): void => {
