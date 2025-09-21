@@ -110,6 +110,9 @@
 
                     <!-- Header Actions -->
                     <div class="flex items-center space-x-2">
+                        <div>
+                            <NotificationArea />
+                        </div>
                         <ThemeController />
                         <button @click="handleSignOut" :disabled="isSigningOut" class="btn btn-ghost btn-sm">
                             <span>{{ isSigningOut ? 'Signing out...' : 'Sign out' }}</span>
@@ -210,15 +213,15 @@ const getCurrentPageIcon = (): string => {
 
 // Watch route changes to update activeMenuItem
 watch(
-  () => route.fullPath,
-  (newPath) => {
-    // Extract the last segment after /dashboard
-    const match = newPath.match(/\/dashboard(?:\/([^/?#]+))?/)
-    if (match) {
-      activeMenuItem.value = match[1] || 'dashboard'
-    }
-  },
-  { immediate: true }
+    () => route.fullPath,
+    (newPath) => {
+        // Extract the last segment after /dashboard
+        const match = newPath.match(/\/dashboard(?:\/([^/?#]+))?/)
+        if (match) {
+            activeMenuItem.value = match[1] || 'dashboard'
+        }
+    },
+    { immediate: true }
 )
 
 // Handle window resize

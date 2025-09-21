@@ -177,10 +177,9 @@ const handleSubmit = async () => {
                 <!-- Transaction Date and Time -->
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Date and Time</span>
+                        <span class="label-text">Transaction at</span>
                     </label>
-                    <input type="datetime-local" v-model="form.transaction_at" class="input input-bordered w-full"
-                        required />
+                    <input type="date" v-model="form.transaction_at" class="input input-bordered w-full" required />
                 </div>
 
                 <!-- Error Message -->

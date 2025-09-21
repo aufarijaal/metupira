@@ -8,7 +8,6 @@ export interface Transaction {
   };
   note: string;
   transaction_at: string;
-  created_at: string;
 }
 
 export interface ChartData {

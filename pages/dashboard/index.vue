@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useTheme } from '~/composables/useTheme'
 import useTransactionRange from '~/composables/useTransactionRange'
 import type { Transaction, ChartData, CategoryData } from '~/types'
@@ -11,25 +11,47 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 const { dateRange, selectedRange, groupTransactionsByRange, filterTransactionsByRange } = useTransactionRange()
+const user = useSupabaseUser()
 
-// Data refs
+// Account switching
+const accounts = ref<{ id: string, label: string }[]>([])
+const selectedAccountId = ref<string>('')
+
 const transactions = ref<Transaction[]>([])
 const loading = ref(true)
 const error = ref('')
 
-// Function to fetch transactions
+// Fetch linked accounts for switcher
+const fetchAccounts = async () => {
+    accounts.value = []
+    // Own account
+    if (user.value?.id) {
+        accounts.value.push({ id: user.value.id, label: user.value.email || 'My Account' })
+        selectedAccountId.value = user.value.id
+    }
+    // Linked accounts (as parent/requester)
+    const { data, error: err } = await supabase
+        .from('linked_accounts')
+        .select('child_id,child:profiles!linked_accounts_child_id_fkey(email),status')
+        .eq('parent_id', user.value?.id)
+        .eq('status', 'approved')
+    if (!err && data) {
+        data.forEach((acc: any) => {
+            accounts.value.push({ id: acc.child_id, label: acc.child?.email || 'Linked Account' })
+        })
+    }
+}
+
+// Fetch transactions for selected account
 const fetchTransactions = async () => {
+    loading.value = true
+    error.value = ''
     try {
         const { data, error: err } = await supabase
             .from('transactions')
-            .select(`
-        *,
-        categories (
-          name
-        )
-      `)
+            .select(`*, categories ( name )`)
+            .eq('user_id', selectedAccountId.value)
             .order('transaction_at', { ascending: false })
-
         if (err) throw err
         transactions.value = data || []
     } catch (e: any) {
@@ -38,6 +60,10 @@ const fetchTransactions = async () => {
         loading.value = false
     }
 }
+
+watch(selectedAccountId, () => {
+    fetchTransactions()
+})
 
 // Stats
 const stats = computed(() => {
@@ -110,13 +136,22 @@ const categoryData = computed<CategoryData[]>(() => {
 })
 
 // Initialize data fetching
-onMounted(() => {
-    fetchTransactions()
+onMounted(async () => {
+    await fetchAccounts()
+    await fetchTransactions()
 })
 </script>
 
 <template>
     <div class="min-h-screen p-6 space-y-6">
+        <!-- Account Switcher -->
+        <div class="mb-6 flex items-center gap-4">
+            <label class="font-semibold">View as:</label>
+            <select v-model="selectedAccountId" class="select select-bordered">
+                <option v-for="acc in accounts" :key="acc.id" :value="acc.id">{{ acc.label }}</option>
+            </select>
+        </div>
+
         <!-- Loading State -->
         <div v-if="loading" class="flex items-center justify-center min-h-[200px]">
             <span class="loading loading-spinner loading-lg"></span>

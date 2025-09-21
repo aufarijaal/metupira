@@ -17,7 +17,6 @@ interface Transaction {
     category_name: string
     note: string
     transaction_at: string
-    created_at: string
 }
 
 // Table state
@@ -59,8 +58,9 @@ const fetchTransactions = async () => {
         transactions.value = (data || []).map((t: any) => ({
             ...t,
             category_name: t.categories.name,
-            transaction_at: new Date(t.transaction_at).toLocaleString(),
-            created_at: new Date(t.created_at).toLocaleString()
+            transaction_at: new Intl.DateTimeFormat('id-ID', {
+                dateStyle: 'medium',
+            }).format(new Date(t.transaction_at))
         }))
     } catch (e: any) {
         error.value = 'Failed to load transactions: ' + e.message
@@ -73,7 +73,7 @@ const fetchTransactions = async () => {
 const columns: ColumnDef<Transaction>[] = [
     {
         accessorKey: 'transaction_at',
-        header: 'Date & Time',
+        header: 'Date',
         cell: (row: any) => row.getValue(),
         sortingFn: (rowA: any, rowB: any) => {
             return new Date(rowA.original.transaction_at).getTime() - new Date(rowB.original.transaction_at).getTime()
@@ -286,7 +286,7 @@ definePageMeta({
                     }
                 }">
                     <option value="">None</option>
-                    <option value="transaction_at">Date & Time</option>
+                    <option value="transaction_at">Date</option>
                     <option value="amount">Amount</option>
                 </select>
             </div>
@@ -336,7 +336,7 @@ definePageMeta({
                         <option value="20">20 per page</option>
                         <option value="50">50 per page</option>
                     </select>
-                    <span class="text-sm text-gray-600">
+                    <span class="text-sm">
                         Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
                     </span>
                 </div>
