@@ -32,6 +32,7 @@ export default defineNuxtConfig({
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseAnonKey: process.env.SUPABASE_KEY,
+      onesignalAppId: process.env.ONESIGNAL_APP_ID,
     },
   },
   supabase: {
