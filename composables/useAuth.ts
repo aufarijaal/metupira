@@ -1,10 +1,12 @@
 import { useRouter } from "vue-router";
+import { useOneSignal } from "@onesignal/onesignal-vue3";
 
 export const useAuth = () => {
   const supabase = useSupabaseClient();
   const router = useRouter();
   const user = useSupabaseUser();
   const isAuthenticated = computed(() => !!user.value);
+  const onesignal = useOneSignal();
 
   const signOut = async (): Promise<void> => {
     try {

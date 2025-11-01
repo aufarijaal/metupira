@@ -11,6 +11,14 @@ useHead({
 
 <template>
     <div class="min-h-screen p-6 space-y-6">
+        <!-- Enable Notifications -->
+        <div class="bg-base-100 p-6 rounded-box shadow">
+            <h2 class="text-2xl font-bold mb-4">Enable Notifications</h2>
+            <client-only>
+                <button-notification-enablement />
+            </client-only>
+        </div>
+
         <!-- Delete Account -->
         <div class="bg-base-100 p-6 rounded-box shadow">
             <h2 class="text-2xl font-bold mb-4">Delete Account</h2>

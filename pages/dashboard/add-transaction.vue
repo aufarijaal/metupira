@@ -77,7 +77,7 @@ const handleSubmit = async () => {
             user_id: user.value.id
         }
 
-        console.log('Submitting transaction:', values)
+        // console.log('Submitting transaction:', values)
 
         const { error: dbError } = await supabase
             .from('transactions')
