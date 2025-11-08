@@ -2,9 +2,26 @@ import { supabase } from "~/composables/supabaseClient";
 
 export default defineEventHandler(async (event) => {
   const { data, error } = await supabase
+    .from("linked_accounts")
+    .select("parent_id")
+    .eq("child_id", "")
+    .single();
+
+  if (error) {
+    return { result: null, error: error };
+  }
+
+  if (!data?.parent_id) {
+    return { result: null, error: null };
+  }
+
+  const { data: dataPlayerId, error: errorPlayerId } = await supabase
     .from("user_devices")
     .select("onesignal_player_id")
-    .eq("user_id", "5991c872-f4e1-4ce9-a0d6-9caa6d95016f");
+    .eq("user_id", data?.parent_id);
 
-  return { playerIds: data?.map((d) => d.onesignal_player_id) || [] };
+  return {
+    result: dataPlayerId?.map((item) => item.onesignal_player_id),
+    error: error,
+  };
 });

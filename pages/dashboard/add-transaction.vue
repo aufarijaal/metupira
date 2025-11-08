@@ -27,7 +27,8 @@ const form = ref<TransactionForm>({
     amount: 0,
     category_id: 0,
     note: '',
-    transaction_at: new Date().toISOString().slice(0, 16) // Format: YYYY-MM-DDTHH:mm
+    // defaulting transaction_at to immeditely show current date
+    transaction_at: new Date().toISOString().slice(0, 10) // Format: YYYY-MM-DD
 })
 
 const loading = ref(false)

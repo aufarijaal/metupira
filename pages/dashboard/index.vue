@@ -47,11 +47,18 @@ const fetchTransactions = async () => {
     loading.value = true
     error.value = ''
     try {
+        // const { data, error: err } = await supabase
+        //     .from('transactions')
+        //     .select(`*, categories ( name )`)
+        //     .eq('user_id', selectedAccountId.value)
+        //     .order('transaction_at', { ascending: false })
+
         const { data, error: err } = await supabase
             .from('transactions')
-            .select(`*, categories ( name )`)
+            .select(`*`)
             .eq('user_id', selectedAccountId.value)
             .order('transaction_at', { ascending: false })
+
         if (err) throw err
         transactions.value = data || []
     } catch (e: any) {
