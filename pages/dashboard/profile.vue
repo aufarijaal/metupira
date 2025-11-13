@@ -13,6 +13,6 @@ useHead({
 
 <template>
     <div>
-        Profile page.
+        {{ $t('profile.profilePage') }}
     </div>
 </template>

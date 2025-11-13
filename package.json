@@ -14,8 +14,10 @@
     "@nuxt/eslint": "1.5.2",
     "@nuxt/fonts": "0.11.4",
     "@nuxt/icon": "1.15.0",
+    "@nuxtjs/i18n": "10.2.0",
     "@nuxtjs/supabase": "1.5.3",
     "@onesignal/onesignal-vue3": "^2.3.0",
+    "@pinia/nuxt": "0.11.3",
     "@supabase/supabase-js": "^2.51.0",
     "@tanstack/vue-table": "^8.21.3",
     "@vueuse/core": "^13.8.0",
@@ -25,6 +27,7 @@
     "nuxt": "^3.17.7",
     "nuxt-echarts": "0.4.0",
     "openai": "^5.12.2",
+    "pinia": "^3.0.4",
     "theme-change": "^2.5.0",
     "vue": "^3.5.17",
     "vue-router": "^4.5.1"
@@ -36,5 +39,6 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.9.2",
     "vue3-json-viewer": "^2.4.1"
-  }
+  },
+  "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac"
 }

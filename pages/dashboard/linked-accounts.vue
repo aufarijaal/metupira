@@ -175,18 +175,18 @@ onMounted(() => {
 </script>
 <template>
     <div class="min-h-screen p-6 space-y-6">
-        <h3 class="text-sm"><span class="font-bold">Linked Accounts</span> lets you view or share transactions with
-            others, such as children, spouse, or clients.</h3>
+        <h3 class="text-sm"><span class="font-bold">{{ $t('linkedAccounts.title') }}</span> {{
+            $t('linkedAccounts.description') }}</h3>
 
         <!-- Show alert if any pending linking request from requester -->
         <div class="alert alert-warning" v-if="linkedAccountsAsChild.some(acc => acc.status === 'pending')">
             <Icon name="material-symbols:warning" color="black" size="28" />
-            You have pending linking requests. Please review them below.
+            {{ $t('linkedAccounts.pendingRequestWarning') }}
         </div>
 
         <div class="flex justify-end">
             <button class="btn btn-primary" @click="() => isAddAccountModalOpen = true">
-                Add Account
+                {{ $t('linkedAccounts.addAccount') }}
             </button>
         </div>
 
@@ -194,29 +194,31 @@ onMounted(() => {
 
         <!-- Accounts you linked (Requester) -->
         <div>
-            <h4 class="font-semibold text-base mb-2">Accounts You Linked</h4>
+            <h4 class="font-semibold text-base mb-2">{{ $t('linkedAccounts.accountsYouLinked') }}</h4>
             <div class="overflow-x-auto bg-base-100 rounded-lg mb-8">
                 <table class="table w-full">
                     <thead>
                         <tr>
-                            <th>Email</th>
-                            <th>Alias</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>{{ $t('linkedAccounts.email') }}</th>
+                            <th>{{ $t('linkedAccounts.alias') }}</th>
+                            <th>{{ $t('linkedAccounts.status') }}</th>
+                            <th>{{ $t('common.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Show "No Data" rows if there is no data -->
                         <tr v-if="linkedAccountsAsParent.length === 0">
-                            <td colspan="4" class="text-center text-base-content/50">No linked accounts found.</td>
+                            <td colspan="4" class="text-center text-base-content/50">{{
+                                $t('linkedAccounts.noAccountsFound') }}</td>
                         </tr>
 
                         <tr v-for="account in linkedAccountsAsParent" :key="account.id" class="hover">
                             <td>{{ account.child?.email }}</td>
                             <td>{{ account.alias }}</td>
-                            <td>{{ account.status }}</td>
+                            <td>{{ $t(`linkedAccounts.${account.status}`) }}</td>
                             <td>
-                                <button class="btn btn-error btn-sm" @click="removeAccount(account.id)">Remove</button>
+                                <button class="btn btn-error btn-sm" @click="removeAccount(account.id)">{{
+                                    $t('linkedAccounts.remove') }}</button>
                             </td>
                         </tr>
                     </tbody>
@@ -226,37 +228,38 @@ onMounted(() => {
 
         <!-- Accounts linked to you (Requested) -->
         <div>
-            <h4 class="font-semibold text-base mb-2">Accounts Linked to You</h4>
+            <h4 class="font-semibold text-base mb-2">{{ $t('linkedAccounts.accountsLinkedToYou') }}</h4>
             <p class="text-sm">Every transactions you've made, these accounts can see them.</p>
 
             <div class="overflow-x-auto bg-base-100 rounded-lg mb-8 mt-4">
                 <table class="table w-full">
                     <thead>
                         <tr>
-                            <th>Requester Email</th>
-                            <th>Alias</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>Requester {{ $t('linkedAccounts.email') }}</th>
+                            <th>{{ $t('linkedAccounts.alias') }}</th>
+                            <th>{{ $t('linkedAccounts.status') }}</th>
+                            <th>{{ $t('common.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Show "No Data" rows if there is no data -->
                         <tr v-if="linkedAccountsAsChild.length === 0">
-                            <td colspan="4" class="text-center text-base-content/50">No linked accounts found.</td>
+                            <td colspan="4" class="text-center text-base-content/50">{{
+                                $t('linkedAccounts.noAccountsFound') }}</td>
                         </tr>
 
                         <tr v-for="account in linkedAccountsAsChild" :key="account.id" class="hover">
                             <td>{{ account.parent?.email }}</td>
                             <td>{{ account.alias }}</td>
-                            <td>{{ account.status }}</td>
+                            <td>{{ $t(`linkedAccounts.${account.status}`) }}</td>
                             <td>
                                 <div>
                                     <!-- Button to allow if pending -->
                                     <button v-if="account.status === 'pending'" class="btn btn-success btn-sm mr-2"
-                                        @click="allowLink(account.id)">Allow</button>
+                                        @click="allowLink(account.id)">{{ $t('linkedAccounts.approve') }}</button>
                                     <!-- Button to revoke if not revoked -->
                                     <button v-if="account.status !== 'revoked'" class="btn btn-warning btn-sm"
-                                        @click="revokeLink(account.id)">Revoke</button>
+                                        @click="revokeLink(account.id)">{{ $t('linkedAccounts.revoke') }}</button>
                                 </div>
                             </td>
                         </tr>
@@ -275,7 +278,7 @@ onMounted(() => {
             <div class="flex min-h-full items-center justify-center p-4">
                 <div class="relative w-full max-w-md bg-base-100 rounded-lg shadow-xl p-6">
                     <h3 class="font-bold text-lg mb-4">
-                        Add New Linked Account
+                        {{ $t('linkedAccounts.addNewLinkedAccount') }}
                     </h3>
 
                     <div v-if="error" class="text-sm text-error mb-4">
@@ -285,22 +288,25 @@ onMounted(() => {
                     <form class="space-y-4" @submit.prevent="handleAddAccount">
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Email</span>
+                                <span class="label-text">{{ $t('linkedAccounts.email') }}</span>
                             </label>
-                            <input v-model="newAccountEmail" type="email" required class="input input-bordered w-full">
+                            <input v-model="newAccountEmail" type="email" required class="input input-bordered w-full"
+                                :placeholder="$t('linkedAccounts.enterEmail')">
                         </div>
 
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Alias</span>
+                                <span class="label-text">{{ $t('linkedAccounts.alias') }}</span>
                             </label>
-                            <input v-model="newAccountAlias" type="text" required class="input input-bordered w-full">
+                            <input v-model="newAccountAlias" type="text" required class="input input-bordered w-full"
+                                :placeholder="$t('linkedAccounts.enterAlias')">
                         </div>
 
                         <div class="flex justify-end gap-2 mt-4">
-                            <button type="button" class="btn" @click="isAddAccountModalOpen = false">Cancel</button>
+                            <button type="button" class="btn" @click="isAddAccountModalOpen = false">{{
+                                $t('common.cancel') }}</button>
                             <button type="submit" class="btn btn-primary" :disabled="loading">
-                                <span v-if="loading">Adding...</span>
+                                <span v-if="loading">{{ $t('category.adding') }}</span>
                                 <span v-else>Request</span>
                             </button>
                         </div>

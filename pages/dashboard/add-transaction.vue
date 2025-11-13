@@ -96,7 +96,7 @@ const handleSubmit = async () => {
             amount: 0,
             category_id: 0,
             note: '',
-            transaction_at: new Date().toISOString().slice(0, 16)
+            transaction_at: new Date().toISOString().slice(0, 10) // Format: YYYY-MM-DD
         }
     } catch (e: any) {
         error.value = e.message
@@ -122,22 +122,22 @@ const handleSubmit = async () => {
         <Alert :message="alertMessage" :type="alertType" v-if="showAlert" />
 
         <div class="p-6 bg-base-100 rounded-lg shadow">
-            <h1 class="text-2xl font-bold mb-6">Add New Transaction</h1>
+            <h1 class="text-2xl font-bold mb-6">{{ $t('transaction.addNewTransaction') }}</h1>
 
             <form @submit.prevent="handleSubmit" class="space-y-6">
                 <!-- Transaction Type -->
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Transaction Type</span>
+                        <span class="label-text">{{ $t('transaction.transactionType') }}</span>
                     </label>
                     <div class="flex gap-4">
                         <label class="flex items-center space-x-2 cursor-pointer">
                             <input type="radio" v-model="form.type" value="expense" class="radio" />
-                            <span>Expense</span>
+                            <span>{{ $t('common.expense') }}</span>
                         </label>
                         <label class="flex items-center space-x-2 cursor-pointer">
                             <input type="radio" v-model="form.type" value="income" class="radio" />
-                            <span>Income</span>
+                            <span>{{ $t('common.income') }}</span>
                         </label>
                     </div>
                 </div>
@@ -145,7 +145,7 @@ const handleSubmit = async () => {
                 <!-- Amount -->
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Amount</span>
+                        <span class="label-text">{{ $t('common.amount') }}</span>
                     </label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 transform -translate-y-1/2">Rp.</span>
@@ -157,10 +157,10 @@ const handleSubmit = async () => {
                 <!-- Category -->
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Category</span>
+                        <span class="label-text">{{ $t('common.category') }}</span>
                     </label>
                     <select v-model="form.category_id" class="select select-bordered w-full" required>
-                        <option :value="0">Select a category</option>
+                        <option :value="0">{{ $t('transaction.selectCategory') }}</option>
                         <option v-for="category in filteredCategories" :key="category.id" :value="category.id">
                             {{ category.name }}
                         </option>
@@ -170,7 +170,7 @@ const handleSubmit = async () => {
                 <!-- Note -->
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Note</span>
+                        <span class="label-text">{{ $t('common.note') }}</span>
                     </label>
                     <input type="text" v-model="form.note" class="input input-bordered w-full" required />
                 </div>
@@ -178,7 +178,7 @@ const handleSubmit = async () => {
                 <!-- Transaction Date and Time -->
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Transaction at</span>
+                        <span class="label-text">{{ $t('transaction.transactionAt') }}</span>
                     </label>
                     <input type="date" v-model="form.transaction_at" class="input input-bordered w-full" required />
                 </div>
@@ -191,8 +191,8 @@ const handleSubmit = async () => {
                 <!-- Submit Button -->
                 <div class="form-control">
                     <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-                        <span v-if="loading">Adding...</span>
-                        <span v-else>Add Transaction</span>
+                        <span v-if="loading">{{ $t('transaction.adding') }}</span>
+                        <span v-else>{{ $t('transaction.addTransaction') }}</span>
                     </button>
                 </div>
             </form>

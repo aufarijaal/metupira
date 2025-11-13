@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { useTheme } from '~/composables/useTheme'
 import useTransactionRange from '~/composables/useTransactionRange'
 import type { Transaction, ChartData, CategoryData } from '~/types'
 
@@ -26,18 +25,18 @@ const fetchAccounts = async () => {
     accounts.value = []
     // Own account
     if (user.value?.id) {
-        accounts.value.push({ id: user.value.id, label: user.value.email || 'My Account' })
+        accounts.value.push({ id: user.value.id, label: 'My Account' })
         selectedAccountId.value = user.value.id
     }
     // Linked accounts (as parent/requester)
     const { data, error: err } = await supabase
         .from('linked_accounts')
-        .select('child_id,child:profiles!linked_accounts_child_id_fkey(email),status')
+        .select('child_id,child:profiles!linked_accounts_child_id_fkey(email),status,alias')
         .eq('parent_id', user.value?.id)
         .eq('status', 'approved')
     if (!err && data) {
-        data.forEach((acc: any) => {
-            accounts.value.push({ id: acc.child_id, label: acc.child?.email || 'Linked Account' })
+        data.forEach((acc: any, i) => {
+            accounts.value.push({ id: acc.child_id, label: `${acc.alias}` || `Linked Account ${i + 1}` })
         })
     }
 }
@@ -47,15 +46,9 @@ const fetchTransactions = async () => {
     loading.value = true
     error.value = ''
     try {
-        // const { data, error: err } = await supabase
-        //     .from('transactions')
-        //     .select(`*, categories ( name )`)
-        //     .eq('user_id', selectedAccountId.value)
-        //     .order('transaction_at', { ascending: false })
-
         const { data, error: err } = await supabase
             .from('transactions')
-            .select(`*`)
+            .select(`*, categories ( name )`)
             .eq('user_id', selectedAccountId.value)
             .order('transaction_at', { ascending: false })
 
@@ -171,7 +164,7 @@ onMounted(async () => {
 
         <template v-else>
             <!-- AI Summary Button -->
-            <div>
+            <div v-if="user!.id === selectedAccountId">
                 <AISummarize />
             </div>
 

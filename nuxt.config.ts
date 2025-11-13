@@ -20,6 +20,8 @@ export default defineNuxtConfig({
     "@nuxtjs/supabase",
     "nuxt-echarts",
     "@vueuse/nuxt",
+    "@pinia/nuxt",
+    "@nuxtjs/i18n",
   ],
   postcss: {
     plugins: {
@@ -46,5 +48,12 @@ export default defineNuxtConfig({
   },
   fonts: {
     families: [{ name: "Inter", provider: "google" }],
+  },
+  i18n: {
+    defaultLocale: "en",
+    locales: [
+      { code: "en", name: "English", file: "en.json" },
+      { code: "id", name: "Indonesia", file: "id.json" },
+    ],
   },
 });

@@ -12,10 +12,10 @@ const user = useSupabaseUser()
             <p class="text-lg md:text-xl mb-8 opacity-90">Platform manajemen keuangan pribadi yang membantu Anda melacak
                 pengeluaran dan mencapai tujuan finansial Anda.</p>
             <div class="flex gap-4 justify-center">
-                <NuxtLink v-if="user" to="/dashboard" class="btn btn-primary btn-lg">
+                <NuxtLink v-if="user" :to="$localePath('dashboard')" class="btn btn-primary btn-lg">
                     Go to dashboard
                 </NuxtLink>
-                <NuxtLink v-else to="/auth/signin" class="btn btn-secondary btn-lg">
+                <NuxtLink v-else :to="$localePath('/auth/signin')" class="btn btn-secondary btn-lg">
                     Masuk
                 </NuxtLink>
             </div>

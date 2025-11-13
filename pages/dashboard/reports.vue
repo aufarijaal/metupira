@@ -17,6 +17,7 @@ interface Transaction {
     category_name: string
     note: string
     transaction_at: string
+    transaction_at_raw: string
 }
 
 // Table state
@@ -31,7 +32,8 @@ const editForm = ref({
     type: '',
     amount: 0,
     category_id: null as number | null,
-    note: ''
+    note: '',
+    transaction_at: ''
 })
 
 const categories = ref<{ id: number; name: string }[]>([])
@@ -58,6 +60,7 @@ const fetchTransactions = async () => {
         transactions.value = (data || []).map((t: any) => ({
             ...t,
             category_name: t.categories.name,
+            transaction_at_raw: t.transaction_at,
             transaction_at: new Intl.DateTimeFormat('id-ID', {
                 dateStyle: 'medium',
             }).format(new Date(t.transaction_at))
@@ -73,7 +76,7 @@ const fetchTransactions = async () => {
 const columns: ColumnDef<Transaction>[] = [
     {
         accessorKey: 'transaction_at',
-        header: 'Date',
+        header: 'Transaction date',
         cell: (row: any) => row.getValue(),
         sortingFn: (rowA: any, rowB: any) => {
             return new Date(rowA.original.transaction_at).getTime() - new Date(rowB.original.transaction_at).getTime()
@@ -185,9 +188,10 @@ const openEditModal = (transaction: Transaction) => {
         amount: transaction.amount,
         category_id: transaction.category_id,
         note: transaction.note,
-        // transaction_at: new Date(transaction.transaction_at).toISOString().split('T')[0]
+        transaction_at: transaction.transaction_at_raw.split('T')[0]
     }
     isEditModalOpen.value = true
+    console.log(editForm.value)
 }
 
 const openDeleteModal = (transaction: Transaction) => {
@@ -206,7 +210,8 @@ const handleEdit = async () => {
                 type: editForm.value.type,
                 amount: editForm.value.amount,
                 category_id: editForm.value.category_id,
-                note: editForm.value.note
+                note: editForm.value.note,
+                transaction_at: editForm.value.transaction_at
             })
             .eq('id', selectedTransaction.value.id)
 
@@ -257,7 +262,7 @@ definePageMeta({
 
 <template>
     <div class="p-6">
-        <h1 class="text-2xl font-bold mb-6">All Transactions</h1>
+        <h1 class="text-2xl font-bold mb-6">{{ $t('transaction.allTransactions') }}</h1>
 
         <!-- Error Alert -->
         <div v-if="error" class="alert alert-error mb-4">
@@ -267,16 +272,16 @@ definePageMeta({
         <!-- Table Controls -->
         <div class="flex flex-wrap gap-4 mb-4">
             <div class="form-control">
-                <label class="label">Type Filter</label>
+                <label class="label">{{ $t('transaction.typeFilter') }}</label>
                 <select v-model="typeFilter" class="select select-bordered w-[200px]">
-                    <option value="all">All Transactions</option>
-                    <option value="income">Income Only</option>
-                    <option value="expense">Expenses Only</option>
+                    <option value="all">{{ $t('transaction.allTransactions') }}</option>
+                    <option value="income">{{ $t('transaction.incomeOnly') }}</option>
+                    <option value="expense">{{ $t('transaction.expensesOnly') }}</option>
                 </select>
             </div>
 
             <div class="form-control">
-                <label class="label">Sort By</label>
+                <label class="label">{{ $t('transaction.sortBy') }}</label>
                 <select class="select select-bordered w-[200px]" :value="table.getState().sorting[0]?.id || ''" @change="e => {
                     const value = e.target.value
                     if (value) {
@@ -285,14 +290,14 @@ definePageMeta({
                         table.setSorting([])
                     }
                 }">
-                    <option value="">None</option>
-                    <option value="transaction_at">Date</option>
-                    <option value="amount">Amount</option>
+                    <option value="">{{ $t('common.none') }}</option>
+                    <option value="transaction_at">{{ $t('common.date') }}</option>
+                    <option value="amount">{{ $t('common.amount') }}</option>
                 </select>
             </div>
 
             <div class="form-control">
-                <label class="label">Sort Order</label>
+                <label class="label">{{ $t('transaction.sortOrder') }}</label>
                 <select class="select select-bordered w-[200px]"
                     :value="table.getState().sorting[0]?.desc ? 'desc' : 'asc'" @change="e => {
                         const currentSort = table.getState().sorting[0]
@@ -300,8 +305,8 @@ definePageMeta({
                             table.setSorting([{ ...currentSort, desc: e.target.value === 'desc' }])
                         }
                     }" :disabled="!table.getState().sorting[0]">
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
+                    <option value="asc">{{ $t('common.ascending') }}</option>
+                    <option value="desc">{{ $t('common.descending') }}</option>
                 </select>
             </div>
         </div>
@@ -331,22 +336,23 @@ definePageMeta({
                     <select :value="table.getState().pagination.pageSize"
                         @change="e => table.setPageSize(Number(e.target.value))"
                         class="select select-bordered select-sm">
-                        <option value="5">5 per page</option>
-                        <option value="10">10 per page</option>
-                        <option value="20">20 per page</option>
-                        <option value="50">50 per page</option>
+                        <option value="5">5 {{ $t('transaction.perPage') }}</option>
+                        <option value="10">10 {{ $t('transaction.perPage') }}</option>
+                        <option value="20">20 {{ $t('transaction.perPage') }}</option>
+                        <option value="50">50 {{ $t('transaction.perPage') }}</option>
                     </select>
                     <span class="text-sm">
-                        Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
+                        {{ $t('common.page') }} {{ table.getState().pagination.pageIndex + 1 }} {{ $t('common.of') }} {{
+                        table.getPageCount() }}
                     </span>
                 </div>
                 <div class="join">
                     <button class="join-item btn btn-sm" :disabled="!table.getCanPreviousPage()"
                         @click="table.previousPage()">
-                        Previous
+                        {{ $t('common.previous') }}
                     </button>
                     <button class="join-item btn btn-sm" :disabled="!table.getCanNextPage()" @click="table.nextPage()">
-                        Next
+                        {{ $t('common.next') }}
                     </button>
                 </div>
             </div>
@@ -355,23 +361,23 @@ definePageMeta({
         <!-- Edit Modal -->
         <dialog class="modal" :class="{ 'modal-open': isEditModalOpen }">
             <div class="modal-box">
-                <h3 class="font-bold text-lg mb-4">Edit Transaction</h3>
+                <h3 class="font-bold text-lg mb-4">{{ $t('transaction.editTransaction') }}</h3>
                 <form @submit.prevent="handleEdit">
                     <div class="form-control w-full mb-4">
-                        <label class="label">Type</label>
+                        <label class="label">{{ $t('common.type') }}</label>
                         <select v-model="editForm.type" class="select select-bordered w-full">
-                            <option value="income">Pemasukan</option>
-                            <option value="expense">Pengeluaran</option>
+                            <option value="income">{{ $t('common.income') }}</option>
+                            <option value="expense">{{ $t('common.expense') }}</option>
                         </select>
                     </div>
 
                     <div class="form-control w-full mb-4">
-                        <label class="label">Amount</label>
+                        <label class="label">{{ $t('common.amount') }}</label>
                         <input type="number" v-model="editForm.amount" class="input input-bordered w-full" required />
                     </div>
 
                     <div class="form-control w-full mb-4">
-                        <label class="label">Category</label>
+                        <label class="label">{{ $t('common.category') }}</label>
                         <select v-model="editForm.category_id" class="select select-bordered w-full" required>
                             <option v-for="category in categories" :key="category.id" :value="category.id">
                                 {{ category.name }}
@@ -380,33 +386,42 @@ definePageMeta({
                     </div>
 
                     <div class="form-control w-full mb-4">
-                        <label class="label">Note</label>
+                        <label class="label">{{ $t('common.note') }}</label>
                         <textarea v-model="editForm.note" class="textarea textarea-bordered w-full" rows="3"></textarea>
                     </div>
 
+                    <div class="form-control w-full mb-4">
+                        <label class="label">{{ $t('transaction.transactionDate') }}</label>
+                        <input type="date" v-model="editForm.transaction_at" class="input input-bordered w-full"
+                            required />
+                    </div>
+
                     <div class="modal-action">
-                        <button type="button" class="btn" @click="isEditModalOpen = false">Cancel</button>
-                        <button type="submit" class="btn btn-primary" :disabled="loading">Save Changes</button>
+                        <button type="button" class="btn" @click="isEditModalOpen = false">{{ $t('common.cancel')
+                            }}</button>
+                        <button type="submit" class="btn btn-primary" :disabled="loading">{{ $t('common.saveChanges')
+                            }}</button>
                     </div>
                 </form>
             </div>
             <form method="dialog" class="modal-backdrop" @click="isEditModalOpen = false">
-                <button>close</button>
+                <button>{{ $t('common.close') }}</button>
             </form>
         </dialog>
 
         <!-- Delete Confirmation Modal -->
         <dialog class="modal" :class="{ 'modal-open': isDeleteModalOpen }">
             <div class="modal-box">
-                <h3 class="font-bold text-lg">Confirm Delete</h3>
-                <p class="py-4">Are you sure you want to delete this transaction? This action cannot be undone.</p>
+                <h3 class="font-bold text-lg">{{ $t('transaction.confirmDelete') }}</h3>
+                <p class="py-4">{{ $t('transaction.confirmDeleteMessage') }}</p>
                 <div class="modal-action">
-                    <button class="btn" @click="isDeleteModalOpen = false">Cancel</button>
-                    <button class="btn btn-error" @click="handleDelete" :disabled="loading">Delete</button>
+                    <button class="btn" @click="isDeleteModalOpen = false">{{ $t('common.cancel') }}</button>
+                    <button class="btn btn-error" @click="handleDelete" :disabled="loading">{{ $t('common.delete')
+                        }}</button>
                 </div>
             </div>
             <form method="dialog" class="modal-backdrop" @click="isDeleteModalOpen = false">
-                <button>close</button>
+                <button>{{ $t('common.close') }}</button>
             </form>
         </dialog>
     </div>

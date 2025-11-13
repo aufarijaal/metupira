@@ -176,12 +176,12 @@ definePageMeta({
 <template>
     <div class="p-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Categories</h1>
+            <h1 class="text-2xl font-bold">{{ $t('category.categories') }}</h1>
             <button class="btn btn-primary" @click="showAddModal = true">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Category
+                {{ $t('category.addCategory') }}
             </button>
         </div>
 
@@ -195,17 +195,17 @@ definePageMeta({
             <table class="table w-full">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Actions</th>
+                        <th>{{ $t('common.name') }}</th>
+                        <th>{{ $t('common.type') }}</th>
+                        <th>{{ $t('common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-if="loading">
-                        <td colspan="3" class="text-center py-4">Loading...</td>
+                        <td colspan="3" class="text-center py-4">{{ $t('common.loading') }}</td>
                     </tr>
                     <tr v-else-if="categories.length === 0">
-                        <td colspan="3" class="text-center py-4">No categories found</td>
+                        <td colspan="3" class="text-center py-4">{{ $t('category.noCategoriesFound') }}</td>
                     </tr>
                     <tr v-for="category in categories" :key="category.id">
                         <td>{{ category.name }}</td>
@@ -214,7 +214,7 @@ definePageMeta({
                                 'badge',
                                 category.type === 'income' ? 'badge-success' : 'badge-error'
                             ]">
-                                {{ category.type }}
+                                {{ $t(`common.${category.type}`) }}
                             </span>
                         </td>
                         <td class="flex gap-2">
@@ -239,84 +239,86 @@ definePageMeta({
         <!-- Add Category Modal -->
         <dialog class="modal" :class="{ 'modal-open': showAddModal }">
             <div class="modal-box">
-                <h3 class="font-bold text-lg mb-4">Add New Category</h3>
+                <h3 class="font-bold text-lg mb-4">{{ $t('category.addNewCategory') }}</h3>
                 <form @submit.prevent="handleAdd">
                     <div class="form-control mb-4">
                         <label class="label">
-                            <span class="label-text">Name</span>
+                            <span class="label-text">{{ $t('common.name') }}</span>
                         </label>
                         <input v-model="form.name" type="text" class="input input-bordered" required />
                     </div>
                     <div class="form-control mb-6">
                         <label class="label">
-                            <span class="label-text">Type</span>
+                            <span class="label-text">{{ $t('common.type') }}</span>
                         </label>
                         <select v-model="form.type" class="select select-bordered" required>
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
+                            <option value="expense">{{ $t('common.expense') }}</option>
+                            <option value="income">{{ $t('common.income') }}</option>
                         </select>
                     </div>
                     <div class="modal-action">
-                        <button type="button" class="btn" @click="showAddModal = false">Cancel</button>
+                        <button type="button" class="btn" @click="showAddModal = false">{{ $t('common.cancel')
+                            }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">
-                            {{ loading ? 'Adding...' : 'Add Category' }}
+                            {{ loading ? $t('category.adding') : $t('category.addCategory') }}
                         </button>
                     </div>
                 </form>
             </div>
             <form method="dialog" class="modal-backdrop">
-                <button @click="showAddModal = false">close</button>
+                <button @click="showAddModal = false">{{ $t('common.close') }}</button>
             </form>
         </dialog>
 
         <!-- Edit Category Modal -->
         <dialog class="modal" :class="{ 'modal-open': showEditModal }">
             <div class="modal-box">
-                <h3 class="font-bold text-lg mb-4">Edit Category</h3>
+                <h3 class="font-bold text-lg mb-4">{{ $t('category.editCategory') }}</h3>
                 <form @submit.prevent="handleEdit">
                     <div class="form-control mb-4">
                         <label class="label">
-                            <span class="label-text">Name</span>
+                            <span class="label-text">{{ $t('common.name') }}</span>
                         </label>
                         <input v-model="form.name" type="text" class="input input-bordered" required />
                     </div>
                     <div class="form-control mb-6">
                         <label class="label">
-                            <span class="label-text">Type</span>
+                            <span class="label-text">{{ $t('common.type') }}</span>
                         </label>
                         <select v-model="form.type" class="select select-bordered" required>
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
+                            <option value="expense">{{ $t('common.expense') }}</option>
+                            <option value="income">{{ $t('common.income') }}</option>
                         </select>
                     </div>
                     <div class="modal-action">
-                        <button type="button" class="btn" @click="showEditModal = false">Cancel</button>
+                        <button type="button" class="btn" @click="showEditModal = false">{{ $t('common.cancel')
+                            }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">
-                            {{ loading ? 'Saving...' : 'Save Changes' }}
+                            {{ loading ? $t('category.saving') : $t('common.saveChanges') }}
                         </button>
                     </div>
                 </form>
             </div>
             <form method="dialog" class="modal-backdrop">
-                <button @click="showEditModal = false">close</button>
+                <button @click="showEditModal = false">{{ $t('common.close') }}</button>
             </form>
         </dialog>
 
         <!-- Delete Category Modal -->
         <dialog class="modal" :class="{ 'modal-open': showDeleteModal }">
             <div class="modal-box">
-                <h3 class="font-bold text-lg mb-4">Delete Category</h3>
-                <p>Are you sure you want to delete the category "{{ selectedCategory?.name }}"?</p>
-                <p class="text-sm text-error mt-2">This action cannot be undone.</p>
+                <h3 class="font-bold text-lg mb-4">{{ $t('category.deleteCategory') }}</h3>
+                <p>{{ $t('category.confirmDeleteMessage', { name: selectedCategory?.name }) }}</p>
+                <p class="text-sm text-error mt-2">{{ $t('category.actionCannotBeUndone') }}</p>
                 <div class="modal-action">
-                    <button class="btn" @click="showDeleteModal = false">Cancel</button>
+                    <button class="btn" @click="showDeleteModal = false">{{ $t('common.cancel') }}</button>
                     <button class="btn btn-error" @click="handleDelete" :disabled="loading">
-                        {{ loading ? 'Deleting...' : 'Delete' }}
+                        {{ loading ? $t('category.deleting') : $t('common.delete') }}
                     </button>
                 </div>
             </div>
             <form method="dialog" class="modal-backdrop">
-                <button @click="showDeleteModal = false">close</button>
+                <button @click="showDeleteModal = false">{{ $t('common.close') }}</button>
             </form>
         </dialog>
     </div>

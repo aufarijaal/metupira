@@ -189,6 +189,7 @@ const toggleMobileMenu = (): void => {
 
 const router = useRouter()
 const route = useRoute()
+const localeRoute = useLocaleRoute()
 
 const selectMenuItem = (item: MenuItem): void => {
     activeMenuItem.value = item.id
@@ -197,7 +198,7 @@ const selectMenuItem = (item: MenuItem): void => {
         isMobileMenuOpen.value = false
     }
     // Handle navigation
-    const route = item.id === 'dashboard' ? '/dashboard' : `/dashboard/${item.id}`
+    const route = item.id === 'dashboard' ? localeRoute(`dashboard`) : localeRoute(`/dashboard/${item.id}`)
     router.push(route)
 }
 
