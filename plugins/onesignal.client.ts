@@ -12,7 +12,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     appId: runtimeConfig.public.onesignalAppId, // 👈 this must be defined
     allowLocalhostAsSecureOrigin: true,
     notifyButton: {
-      enable: true,
+      enable: false,
     },
   });
 
