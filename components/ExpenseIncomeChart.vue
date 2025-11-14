@@ -3,10 +3,10 @@ import { computed } from 'vue'
 import type { ChartData } from '~/types'
 import { useTheme } from '~/composables/useTheme'
 // Import the echarts core module, which provides the necessary interfaces for using echarts.
-import * as echarts from 'echarts/core';
+import { use as EchartsUse } from 'echarts/core';
 
 // Import bar charts, all suffixed with Chart
-import { LineChart, PieChart } from 'echarts/charts';
+import { LineChart } from 'echarts/charts';
 
 // Import the tooltip, rectangular coordinate system and dataset components
 import {
@@ -20,7 +20,7 @@ import {
 import { LabelLayout, UniversalTransition } from 'echarts/features';
 
 // Register the required components
-echarts.use([
+EchartsUse([
     TooltipComponent,
     GridComponent,
     DatasetComponent,
@@ -28,7 +28,6 @@ echarts.use([
     UniversalTransition,
     LegendComponent,
     LineChart,
-    PieChart
 ]);
 
 
@@ -37,6 +36,7 @@ const props = defineProps<{
 }>()
 
 const { isDark } = useTheme()
+const { t } = useI18n()
 
 const option = computed(() => ({
     tooltip: {
@@ -66,7 +66,7 @@ const option = computed(() => ({
         }
     },
     legend: {
-        data: ['Expense', 'Income'],
+        data: [t('components.chart.expense'), t('components.chart.income')],
         top: 0,
         textStyle: {
             color: isDark.value ? '#e5e5e5' : '#333'
@@ -143,7 +143,7 @@ const option = computed(() => ({
     },
     series: [
         {
-            name: 'Expense',
+            name: t('components.chart.expense'),
             type: 'line',
             smooth: true,
             symbolSize: 8,
@@ -169,7 +169,7 @@ const option = computed(() => ({
             }
         },
         {
-            name: 'Income',
+            name: t('components.chart.income'),
             type: 'line',
             smooth: true,
             symbolSize: 8,

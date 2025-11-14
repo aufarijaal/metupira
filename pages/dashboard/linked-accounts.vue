@@ -195,7 +195,8 @@ onMounted(() => {
         <!-- Accounts you linked (Requester) -->
         <div>
             <h4 class="font-semibold text-base mb-2">{{ $t('linkedAccounts.accountsYouLinked') }}</h4>
-            <div class="overflow-x-auto bg-base-100 rounded-lg mb-8">
+            <p class="text-sm">{{ $t('linkedAccounts.accountsYouLinkedDescription') }}</p>
+            <div class="overflow-x-auto bg-base-100 rounded-lg mb-8 mt-4">
                 <table class="table w-full">
                     <thead>
                         <tr>
@@ -229,7 +230,7 @@ onMounted(() => {
         <!-- Accounts linked to you (Requested) -->
         <div>
             <h4 class="font-semibold text-base mb-2">{{ $t('linkedAccounts.accountsLinkedToYou') }}</h4>
-            <p class="text-sm">Every transactions you've made, these accounts can see them.</p>
+            <p class="text-sm">{{ $t('linkedAccounts.accountsLinkedToYouDescription') }}</p>
 
             <div class="overflow-x-auto bg-base-100 rounded-lg mb-8 mt-4">
                 <table class="table w-full">

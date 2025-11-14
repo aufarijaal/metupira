@@ -8,12 +8,16 @@
             <div class="flex items-start">
                 <Icon size="20" name="material-symbols:account-circle" class="text-primary mr-2 mt-1" />
                 <div>
-                    <p class="font-semibold">Approval Request</p>
-                    <p class="text-sm text-base-content/70">User John Doe has requested to link their account.</p>
-                    <p class="text-xs text-base-content/50 mt-1">5 minutes ago</p>
+                    <p class="font-semibold">{{ $t('components.notification.approvalRequest') }}</p>
+                    <p class="text-sm text-base-content/70">{{ $t('components.notification.userRequestedLink', {
+                        name:
+                        'John Doe' }) }}</p>
+                    <p class="text-xs text-base-content/50 mt-1">{{ $t('components.notification.minutesAgo', {
+                        count: 5
+                        }) }}</p>
                     <div class="mt-2 flex gap-2">
-                        <button class="btn btn-sm btn-success">Approve</button>
-                        <button class="btn btn-sm btn-error">Deny</button>
+                        <button class="btn btn-sm btn-success">{{ $t('components.notification.approve') }}</button>
+                        <button class="btn btn-sm btn-error">{{ $t('components.notification.deny') }}</button>
                     </div>
                 </div>
             </div>

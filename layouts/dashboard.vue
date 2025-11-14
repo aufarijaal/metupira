@@ -20,7 +20,7 @@
                         </div>
                         <transition name="fade">
                             <span v-if="isSidebarOpen" class="text-xl font-bold text-base-content">
-                                Dashboard
+                                {{ $t('navigation.dashboard') }}
                             </span>
                         </transition>
                     </div>
@@ -115,7 +115,7 @@
                         </div>
                         <ThemeController />
                         <button @click="handleSignOut" :disabled="isSigningOut" class="btn btn-ghost btn-sm">
-                            <span>{{ isSigningOut ? 'Signing out...' : 'Sign out' }}</span>
+                            <span>{{ isSigningOut ? $t('navigation.signingOut') : $t('navigation.signOut') }}</span>
                         </button>
                     </div>
                 </div>
@@ -130,10 +130,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import type { MenuItem } from '~/types/menu'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+// i18n composable
+const { t } = useI18n()
 
 // Auth composable
 const { user, signOut: handleSignOut } = useAuth()
@@ -144,39 +148,39 @@ const isMobileMenuOpen = ref<boolean>(false)
 const activeMenuItem = ref<string>('dashboard')
 const isSigningOut = ref(false)
 
-// Menu items
-const menuItems: MenuItem[] = [
+// Menu items with translation keys
+const menuItems = computed<MenuItem[]>(() => [
     {
         id: 'dashboard',
-        name: 'Dashboard',
+        name: t('navigation.dashboard'),
         icon: '<svg fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>'
     },
     {
         id: 'linked-accounts',
-        name: 'Linked Accounts',
+        name: t('navigation.linkedAccounts'),
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><g fill="currentColor"><path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 1 1 7.5 0a3.75 3.75 0 0 1-7.5 0m7.5 3a3 3 0 1 1 6 0a3 3 0 0 1-6 0m-13.5 0a3 3 0 1 1 6 0a3 3 0 0 1-6 0m4.06 5.368A6.75 6.75 0 0 1 12 12a6.745 6.745 0 0 1 6.709 7.498a.75.75 0 0 1-.372.568A12.7 12.7 0 0 1 12 21.75a12.7 12.7 0 0 1-6.337-1.684a.75.75 0 0 1-.372-.568a6.8 6.8 0 0 1 1.019-4.38" clip-rule="evenodd"/><path d="m5.082 14.254l-.036.055a8.3 8.3 0 0 0-1.271 5.08a9.7 9.7 0 0 1-1.765-.44l-.115-.04a.56.56 0 0 1-.373-.487l-.01-.121Q1.5 18.15 1.5 18a3.75 3.75 0 0 1 3.582-3.746m15.144 5.135a8.3 8.3 0 0 0-1.308-5.135a3.75 3.75 0 0 1 3.57 4.047l-.01.121a.56.56 0 0 1-.373.486l-.115.04q-.851.302-1.764.441"/></g></svg>'
     },
     {
         id: 'add-transaction',
-        name: 'Add Transaction',
+        name: t('navigation.addTransaction'),
         icon: '<svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/></svg>'
     },
     {
         id: 'categories',
-        name: 'Categories',
+        name: t('navigation.categories'),
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><path fill="currentColor" d="M6.5 11L12 2l5.5 9zm11 11q-1.875 0-3.187-1.312T13 17.5t1.313-3.187T17.5 13t3.188 1.313T22 17.5t-1.312 3.188T17.5 22M3 21.5v-8h8v8z"/></svg>'
     },
     {
-        id: 'reports',
-        name: 'Reports',
-        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><path fill="currentColor" d="M17.45 15.18L22 7.31V21H2V3h2v12.54L9.5 6L16 9.78l4.24-7.33l1.73 1l-5.23 9.05l-6.51-3.75L4.31 19h2.26l4.39-7.56z"/></svg>'
+        id: 'transactions',
+        name: t('navigation.transactions'),
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M11 16H3v3q0 .825.588 1.413T5 21h6zm2 0v5h6q.825 0 1.413-.587T21 19v-3zm-2-2V9H3v5zm2 0h8V9h-8zM3 7h18V5q0-.825-.587-1.412T19 3H5q-.825 0-1.412.588T3 5z"/></svg>'
     },
     {
         id: 'settings',
-        name: 'Settings',
+        name: t('navigation.settings'),
         icon: '<svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>'
     },
-]
+])
 
 // Methods
 const toggleSidebar = (): void => {
@@ -203,13 +207,13 @@ const selectMenuItem = (item: MenuItem): void => {
 }
 
 const getCurrentPageTitle = (): string => {
-    const item = menuItems.find(item => item.id === activeMenuItem.value)
-    return item?.name || 'Dashboard'
+    const item = menuItems.value.find(item => item.id === activeMenuItem.value)
+    return item?.name || t('navigation.dashboard')
 }
 
 const getCurrentPageIcon = (): string => {
-    const item = menuItems.find(item => item.id === activeMenuItem.value)
-    return item?.icon || menuItems[0].icon
+    const item = menuItems.value.find(item => item.id === activeMenuItem.value)
+    return item?.icon || menuItems.value[0].icon
 }
 
 // Watch route changes to update activeMenuItem

@@ -67,6 +67,8 @@
         "addAccount": "Add Account",
         "accountsYouLinked": "Accounts You Linked",
         "accountsLinkedToYou": "Accounts Linked to You",
+        "accountsLinkedToYouDescription": "These accounts can see every transaction you've made.",
+        "accountsYouLinkedDescription": "You can view transactions from the accounts you've linked.",
         "email": "Email",
         "alias": "Alias",
         "status": "Status",
@@ -96,6 +98,17 @@
         "deleteAccount": "Delete Account",
         "deleteAccountWarning": "Once you delete your account, there is no going back. Please be certain."
     },
+    "navigation": {
+        "dashboard": "Dashboard",
+        "linkedAccounts": "Linked Accounts",
+        "addTransaction": "Add Transaction",
+        "categories": "Categories",
+        "transactions": "Transactions",
+        "settings": "Settings",
+        "profile": "Profile",
+        "signOut": "Sign out",
+        "signingOut": "Signing out..."
+    },
     "dashboard": {
         "title": "Dashboard",
         "totalIncome": "Total Income",
@@ -103,7 +116,12 @@
         "balance": "Balance",
         "recentTransactions": "Recent Transactions",
         "categoryDistribution": "Category Distribution",
-        "incomeVsExpense": "Income vs Expense"
+        "incomeVsExpense": "Income vs Expense",
+        "viewAs": "View as:",
+        "myAccount": "My Account",
+        "expenseCategories": "Expense Categories",
+        "basedOnSelectedTimeRange": "Based on selected time range",
+        "failedToLoadTransactions": "Failed to load transactions"
     },
     "error": {
         "failedToLoad": "Failed to load {resource}: {message}",
@@ -116,5 +134,47 @@
     "profile": {
         "title": "Profile",
         "profilePage": "Profile page."
+    },
+    "landing": {
+        "title": "Manage Your Finances with Metu Pira",
+        "subtitle": "A personal financial management platform that helps you track expenses and achieve your financial goals.",
+        "goToDashboard": "Go to Dashboard",
+        "signIn": "Sign In"
+    },
+    "components": {
+        "aiSummarize": {
+            "generateWeeklySummary": "Generate Weekly Summary",
+            "poweredBy": "Powered by",
+            "failedToGenerateSummary": "Failed to generate summary"
+        },
+        "notification": {
+            "noNewNotifications": "No new notifications",
+            "approvalRequest": "Approval Request",
+            "userRequestedLink": "User {name} has requested to link their account.",
+            "approve": "Approve",
+            "deny": "Deny",
+            "notificationTitle": "Notification Title",
+            "generalMessage": "This is a general notification message.",
+            "justNow": "Just now",
+            "minutesAgo": "{count} minutes ago"
+        },
+        "buttonNotification": {
+            "notificationsEnabled": "Notifications Enabled",
+            "enableNotifications": "Enable Notifications"
+        },
+        "dateRangeSelector": {
+            "to": "to",
+            "customRange": "Custom Range",
+            "today": "Today",
+            "last7Days": "Last 7 Days",
+            "last30Days": "Last 30 days",
+            "last12Weeks": "Last 12 weeks",
+            "last12Months": "Last 12 months"
+        },
+        "chart": {
+            "expense": "Expense",
+            "income": "Income",
+            "expenseCategories": "Expense Categories"
+        }
     }
 }

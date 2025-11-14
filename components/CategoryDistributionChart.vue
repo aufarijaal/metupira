@@ -3,10 +3,10 @@ import { computed } from 'vue'
 import { useTheme } from '~/composables/useTheme'
 import type { CategoryData } from '~/types'
 // Import the echarts core module, which provides the necessary interfaces for using echarts.
-import * as echarts from 'echarts/core';
+import { use as EchartsUse } from 'echarts/core';
 
 // Import bar charts, all suffixed with Chart
-import { LineChart, PieChart } from 'echarts/charts';
+import { PieChart } from 'echarts/charts';
 
 // Import the tooltip, rectangular coordinate system and dataset components
 import {
@@ -20,14 +20,13 @@ import {
 import { LabelLayout, UniversalTransition } from 'echarts/features';
 
 // Register the required components
-echarts.use([
+EchartsUse([
     TooltipComponent,
     GridComponent,
     DatasetComponent,
     LabelLayout,
     UniversalTransition,
     LegendComponent,
-    LineChart,
     PieChart
 ]);
 
@@ -36,6 +35,7 @@ const props = defineProps<{
 }>()
 
 const { isDark } = useTheme()
+const { t } = useI18n()
 
 const option = computed(() => ({
     tooltip: {
@@ -74,7 +74,7 @@ const option = computed(() => ({
     },
     series: [
         {
-            name: 'Expense Categories',
+            name: t('components.chart.expenseCategories'),
             type: 'pie',
             radius: ['40%', '70%'],
             center: ['60%', '50%'],

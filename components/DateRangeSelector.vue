@@ -20,7 +20,7 @@ const emit = defineEmits<{
             <input type="date" :value="dateRange.start"
                 @input="(e) => emit('update:dateRange', { ...dateRange, start: (e.target as HTMLInputElement).value })"
                 class="input input-bordered input-sm" :max="dateRange.end" />
-            <span class="text-sm self-center">to</span>
+            <span class="text-sm self-center">{{ $t('components.dateRangeSelector.to') }}</span>
             <input type="date" :value="dateRange.end"
                 @input="(e) => emit('update:dateRange', { ...dateRange, end: (e.target as HTMLInputElement).value })"
                 class="input input-bordered input-sm" :min="dateRange.start" />
@@ -30,12 +30,12 @@ const emit = defineEmits<{
         <select :value="selectedRange"
             @change="(e) => emit('update:selectedRange', (e.target as HTMLSelectElement).value)"
             class="select select-bordered select-sm">
-            <option value="custom">Custom Range</option>
-            <option value="today">Today</option>
-            <option value="last7days">Last 7 Days</option>
-            <option value="daily">Last 30 days</option>
-            <option value="weekly">Last 12 weeks</option>
-            <option value="monthly">Last 12 months</option>
+            <option value="custom">{{ $t('components.dateRangeSelector.customRange') }}</option>
+            <option value="today">{{ $t('components.dateRangeSelector.today') }}</option>
+            <option value="last7days">{{ $t('components.dateRangeSelector.last7Days') }}</option>
+            <option value="daily">{{ $t('components.dateRangeSelector.last30Days') }}</option>
+            <option value="weekly">{{ $t('components.dateRangeSelector.last12Weeks') }}</option>
+            <option value="monthly">{{ $t('components.dateRangeSelector.last12Months') }}</option>
         </select>
     </div>
 </template>

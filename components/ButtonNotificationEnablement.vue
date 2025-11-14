@@ -36,7 +36,8 @@ async function requestPermissionAndSaveId() {
     <div>
         <button :disabled="onesignal.Notifications.permission" class="btn btn-primary"
             @click="requestPermissionAndSaveId">
-            {{ onesignal.Notifications.permission ? 'Notifications Enabled' : 'Enable Notifications' }}
+            {{ onesignal.Notifications.permission ? $t('components.buttonNotification.notificationsEnabled') :
+                $t('components.buttonNotification.enableNotifications') }}
         </button>
     </div>
 </template>

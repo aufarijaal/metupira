@@ -11,6 +11,7 @@ definePageMeta({
 const supabase = useSupabaseClient()
 const { dateRange, selectedRange, groupTransactionsByRange, filterTransactionsByRange } = useTransactionRange()
 const user = useSupabaseUser()
+const { t } = useI18n()
 
 // Account switching
 const accounts = ref<{ id: string, label: string }[]>([])
@@ -25,7 +26,7 @@ const fetchAccounts = async () => {
     accounts.value = []
     // Own account
     if (user.value?.id) {
-        accounts.value.push({ id: user.value.id, label: 'My Account' })
+        accounts.value.push({ id: user.value.id, label: t('dashboard.myAccount') })
         selectedAccountId.value = user.value.id
     }
     // Linked accounts (as parent/requester)
@@ -55,7 +56,7 @@ const fetchTransactions = async () => {
         if (err) throw err
         transactions.value = data || []
     } catch (e: any) {
-        error.value = 'Failed to load transactions: ' + e.message
+        error.value = t('dashboard.failedToLoadTransactions') + ': ' + e.message
     } finally {
         loading.value = false
     }
@@ -146,8 +147,8 @@ onMounted(async () => {
     <div class="min-h-screen p-6 space-y-6">
         <!-- Account Switcher -->
         <div class="mb-6 flex items-center gap-4">
-            <label class="font-semibold">View as:</label>
-            <select v-model="selectedAccountId" class="select select-bordered">
+            <label class="font-semibold text-sm">{{ $t('dashboard.viewAs') }}</label>
+            <select v-model="selectedAccountId" class="select select-sm select-bordered">
                 <option v-for="acc in accounts" :key="acc.id" :value="acc.id">{{ acc.label }}</option>
             </select>
         </div>
@@ -172,7 +173,7 @@ onMounted(async () => {
             <div class="grid sm:grid-cols-2 gap-6">
                 <!-- Total Income -->
                 <div class="stat bg-base-100 rounded-box shadow">
-                    <div class="stat-title">Total Income</div>
+                    <div class="stat-title">{{ $t('dashboard.totalIncome') }}</div>
                     <div class="stat-value text-success">
                         {{ stats.totalIncome.toLocaleString('id-ID', {
                             style: 'currency',
@@ -185,7 +186,7 @@ onMounted(async () => {
 
                 <!-- Total Expense -->
                 <div class="stat bg-base-100 rounded-box shadow">
-                    <div class="stat-title">Total Expense</div>
+                    <div class="stat-title">{{ $t('dashboard.totalExpense') }}</div>
                     <div class="stat-value text-error">
                         {{ stats.totalExpense.toLocaleString('id-ID', {
                             style: 'currency',
@@ -202,7 +203,7 @@ onMounted(async () => {
                 <!-- Income vs Expenses Chart -->
                 <div class="bg-base-100 p-6 rounded-box shadow">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                        <h3 class="text-lg font-semibold">Income vs Expense</h3>
+                        <h3 class="text-lg font-semibold">{{ $t('dashboard.incomeVsExpense') }}</h3>
                         <DateRangeSelector v-model:selectedRange="selectedRange" v-model:dateRange="dateRange" />
                     </div>
                     <ClientOnly>
@@ -213,9 +214,9 @@ onMounted(async () => {
                 <!-- Category Distribution Chart -->
                 <div class="bg-base-100 p-6 rounded-box shadow">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-semibold">Expense Categories</h3>
+                        <h3 class="text-lg font-semibold">{{ $t('dashboard.expenseCategories') }}</h3>
                         <div class="text-sm text-base-content/60">
-                            Based on selected time range
+                            {{ $t('dashboard.basedOnSelectedTimeRange') }}
                         </div>
                     </div>
                     <ClientOnly>

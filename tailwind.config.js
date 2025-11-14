@@ -25,5 +25,6 @@ export default {
     utils: true, // adds responsive and modifier utility classes
     prefix: "", // prefix for daisyUI classnames (components, modifiers and responsive class names. Not colors)
     themeRoot: ":root", // The element that receives theme color CSS variables
+    logs: false,
   },
 };

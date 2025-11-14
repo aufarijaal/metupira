@@ -14,7 +14,7 @@ const { notifications } = useNotificationStore();
         <ul tabindex="0"
             class="dropdown-content bg-base-300 rounded-box z-[1] w-[400px] p-2 shadow-2xl max-h-[500px] overflow-y-auto space-y-1">
             <li v-if="notifications.length === 0" class="p-4 text-center text-sm text-gray-500">
-                No new notifications
+                {{ $t('components.notification.noNewNotifications') }}
             </li>
             <li v-for="(notification, index) in notifications" :key="index" class="bg-base-100 h-10">
                 <NuxtLink v-if="notification.url" :to="notification.url">

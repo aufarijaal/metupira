@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const supabase = useSupabaseClient()
+const { t } = useI18n()
 
 const loading = ref(false)
 const error = ref('')
@@ -42,7 +43,7 @@ const generateSummary = async () => {
         if (error.value) throw error.value
         summary.value = data.value.summary
     } catch (err: any) {
-        error.value = err.message || 'Failed to generate summary'
+        error.value = err.message || t('components.aiSummarize.failedToGenerateSummary')
     } finally {
         loading.value = false
     }
@@ -52,15 +53,15 @@ const generateSummary = async () => {
 <template>
     <div class="w-full bg-base-100 p-6 rounded-lg shadow-md flex flex-col items-center">
         <button class="btn btn-primary" @click="generateSummary" :disabled="loading">
-            <span v-if="loading">Loading...</span>
+            <span v-if="loading">{{ $t('common.loading') }}</span>
             <span v-else>
-                Generate Weekly Summary
+                {{ $t('components.aiSummarize.generateWeeklySummary') }}
             </span>
         </button>
 
         <!-- showing label powered by gemini with the icon -->
         <div class="text-sm text-gray-500 mt-2 flex items-center gap-2">
-            <span class="translate-y-0.5">Powered by</span>
+            <span class="translate-y-0.5">{{ $t('components.aiSummarize.poweredBy') }}</span>
             <icons-gemini-text-icon />
         </div>
 

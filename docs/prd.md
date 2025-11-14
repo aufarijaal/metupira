@@ -25,7 +25,7 @@ To help users manage their personal finances by providing authentication, a dash
 
 - Responsive dashboard layout with sidebar navigation.
 - Sidebar is collapsible and adapts to mobile (full-screen menu).
-- Navigation items: Home, Profile, Settings, Reports.
+- Navigation items: Home, Profile, Settings, Transactions.
 - Placeholder content for each dashboard section.
 - User profile and sign-out in sidebar (layout).
 
@@ -59,7 +59,7 @@ To help users manage their personal finances by providing authentication, a dash
 - As a user, I can sign in securely with Google.
 - As a user, I see a dashboard with navigation and my profile info.
 - As a user, I can log out from any page.
-- As a user, I can navigate between Home, Profile, Settings, and Reports (placeholders for now).
+- As a user, I can navigate between Home, Profile, Settings, and Transactions.
 - As a user, I see a responsive UI on both desktop and mobile.
 
 ---
@@ -114,8 +114,6 @@ To help users manage their personal finances by providing authentication, a dash
 
 ### Recently Added or Changed
 
--
-
----
+- ***
 
 This PRD is based on the current state of the codebase and is intended to guide further development and onboarding.

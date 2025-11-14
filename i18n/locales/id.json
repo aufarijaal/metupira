@@ -36,8 +36,8 @@
         "editTransaction": "Ubah Transaksi",
         "deleteTransaction": "Hapus Transaksi",
         "adding": "Menambahkan...",
-        "incomeOnly": "Hanya Pemasukan",
-        "expensesOnly": "Hanya Pengeluaran",
+        "incomeOnly": "Pemasukan Saja",
+        "expensesOnly": "Pengeluaran Saja",
         "selectCategory": "Pilih kategori",
         "transactionAddedSuccess": "Transaksi berhasil ditambahkan!",
         "confirmDelete": "Konfirmasi Hapus",
@@ -67,6 +67,8 @@
         "addAccount": "Tambah Akun",
         "accountsYouLinked": "Akun yang Anda Hubungkan",
         "accountsLinkedToYou": "Akun yang Terhubung ke Anda",
+        "accountsLinkedToYouDescription": "Akun-akun ini dapat melihat setiap transaksi yang Anda buat.",
+        "accountsYouLinkedDescription": "Anda dapat melihat transaksi dari akun yang Anda hubungkan.",
         "email": "Email",
         "alias": "Alias",
         "status": "Status",
@@ -83,10 +85,10 @@
         "confirmApprove": "Apakah Anda yakin ingin menyetujui permintaan tautan ini?",
         "addNewLinkedAccount": "Tambah Akun Terhubung Baru",
         "enterEmail": "Masukkan alamat email",
-        "enterAlias": "Masukkan alias (misal: 'Anak Saya', 'Pasangan')",
+        "enterAlias": "Masukkan alias (misalnya, 'Anak Saya', 'Pasangan')",
         "emailRequired": "Silakan masukkan alamat email.",
         "aliasRequired": "Silakan masukkan alias.",
-        "emailNotFound": "Email tidak ditemukan dalam catatan kami.",
+        "emailNotFound": "Email tidak ditemukan di catatan kami.",
         "noAccountsFound": "Tidak ada akun terhubung ditemukan"
     },
     "settings": {
@@ -96,14 +98,30 @@
         "deleteAccount": "Hapus Akun",
         "deleteAccountWarning": "Setelah Anda menghapus akun, tidak ada jalan kembali. Harap pastikan."
     },
+    "navigation": {
+        "dashboard": "Dasbor",
+        "linkedAccounts": "Akun Terhubung",
+        "addTransaction": "Tambah Transaksi",
+        "categories": "Kategori",
+        "transactions": "Transaksi",
+        "settings": "Pengaturan",
+        "profile": "Profil",
+        "signOut": "Keluar",
+        "signingOut": "Keluar..."
+    },
     "dashboard": {
         "title": "Dasbor",
         "totalIncome": "Total Pemasukan",
         "totalExpense": "Total Pengeluaran",
         "balance": "Saldo",
-        "recentTransactions": "Transaksi Terkini",
+        "recentTransactions": "Transaksi Terbaru",
         "categoryDistribution": "Distribusi Kategori",
-        "incomeVsExpense": "Pemasukan vs Pengeluaran"
+        "incomeVsExpense": "Pemasukan vs Pengeluaran",
+        "viewAs": "Lihat sebagai:",
+        "myAccount": "Akun Saya",
+        "expenseCategories": "Kategori Pengeluaran",
+        "basedOnSelectedTimeRange": "Berdasarkan rentang waktu yang dipilih",
+        "failedToLoadTransactions": "Gagal memuat transaksi"
     },
     "error": {
         "failedToLoad": "Gagal memuat {resource}: {message}",
@@ -116,5 +134,47 @@
     "profile": {
         "title": "Profil",
         "profilePage": "Halaman profil."
+    },
+    "landing": {
+        "title": "Kelola Keuangan Anda dengan Metu Pira",
+        "subtitle": "Platform manajemen keuangan pribadi yang membantu Anda melacak pengeluaran dan mencapai tujuan keuangan Anda.",
+        "goToDashboard": "Ke Dasbor",
+        "signIn": "Masuk"
+    },
+    "components": {
+        "aiSummarize": {
+            "generateWeeklySummary": "Buat Ringkasan Mingguan",
+            "poweredBy": "Didukung oleh",
+            "failedToGenerateSummary": "Gagal membuat ringkasan"
+        },
+        "notification": {
+            "noNewNotifications": "Tidak ada notifikasi baru",
+            "approvalRequest": "Permintaan Persetujuan",
+            "userRequestedLink": "Pengguna {name} telah meminta untuk menautkan akun mereka.",
+            "approve": "Setujui",
+            "deny": "Tolak",
+            "notificationTitle": "Judul Notifikasi",
+            "generalMessage": "Ini adalah pesan notifikasi umum.",
+            "justNow": "Baru saja",
+            "minutesAgo": "{count} menit yang lalu"
+        },
+        "buttonNotification": {
+            "notificationsEnabled": "Notifikasi Diaktifkan",
+            "enableNotifications": "Aktifkan Notifikasi"
+        },
+        "dateRangeSelector": {
+            "to": "sampai",
+            "customRange": "Rentang Khusus",
+            "today": "Hari Ini",
+            "last7Days": "7 Hari Terakhir",
+            "last30Days": "30 hari terakhir",
+            "last12Weeks": "12 minggu terakhir",
+            "last12Months": "12 bulan terakhir"
+        },
+        "chart": {
+            "expense": "Pengeluaran",
+            "income": "Pemasukan",
+            "expenseCategories": "Kategori Pengeluaran"
+        }
     }
 }

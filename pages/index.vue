@@ -8,15 +8,14 @@ const user = useSupabaseUser()
         <div
             class="relative z-10 flex flex-col items-center justify-center text-center text-primary-content px-4 py-10 w-full max-w-xl">
             <img src="~/assets/img/metupira-icon.png" alt="Metu Pira" class="w-20 h-20 mb-6 rounded-lg shadow-lg">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Kelola Keuangan Anda dengan Metu Pira</h1>
-            <p class="text-lg md:text-xl mb-8 opacity-90">Platform manajemen keuangan pribadi yang membantu Anda melacak
-                pengeluaran dan mencapai tujuan finansial Anda.</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ $t('landing.title') }}</h1>
+            <p class="text-lg md:text-xl mb-8 opacity-90">{{ $t('landing.subtitle') }}</p>
             <div class="flex gap-4 justify-center">
                 <NuxtLink v-if="user" :to="$localePath('dashboard')" class="btn btn-primary btn-lg">
-                    Go to dashboard
+                    {{ $t('landing.goToDashboard') }}
                 </NuxtLink>
                 <NuxtLink v-else :to="$localePath('/auth/signin')" class="btn btn-secondary btn-lg">
-                    Masuk
+                    {{ $t('landing.signIn') }}
                 </NuxtLink>
             </div>
         </div>
