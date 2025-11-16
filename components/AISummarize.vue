@@ -18,6 +18,22 @@ const generateSummary = async () => {
         loading.value = true
         summary.value = ''
 
+        const sevenDaysBefore = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        sevenDaysBefore.setHours(0, 0, 0, 0)
+
+        const nowDate = new Date()
+        nowDate.setHours(23, 59, 59, 999);
+
+        // Format dates in human-readable format for AI
+        const formatDateForAI = (date: Date) => {
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })
+        }
+
         // Fetch transactions from the supabase
         const { data: transactions, error: fetchError } = await supabase
             .from('transactions')
@@ -31,15 +47,20 @@ const generateSummary = async () => {
                 transaction_at
             `)
             .order('transaction_at', { ascending: false })
-            // limit 7 days
-            .gte('transaction_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+            // limit 7 days with hour of beginning of the day
+            .gte('transaction_at', sevenDaysBefore.toISOString())
             .eq('user_id', user.value?.id)
 
         if (fetchError) throw fetchError
 
         const { data, error } = await useFetch('/api/analyze-transactions', {
             method: 'POST',
-            body: { transactions: JSON.stringify(transactions) }
+            body: {
+                transactions: JSON.stringify(transactions),
+                preferredOutputLanguageCode: t('common.languageCode'),
+                startDate: formatDateForAI(sevenDaysBefore),
+                endDate: formatDateForAI(nowDate),
+            }
         });
 
         if (error.value) throw error.value

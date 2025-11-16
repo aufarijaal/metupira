@@ -24,7 +24,8 @@
         "income": "Income",
         "expense": "Expense",
         "ascending": "Ascending",
-        "descending": "Descending"
+        "descending": "Descending",
+        "languageCode": "en"
     },
     "transaction": {
         "addNewTransaction": "Add New Transaction",
@@ -48,7 +49,9 @@
         "perPage": "per page",
         "noCategoriesAvailable": "No categories available!",
         "noCategoriesMessage": "You need to add some categories first before creating transactions.",
-        "goToCategories": "Go to Categories"
+        "goToCategories": "Go to Categories",
+        "noTransactionsFound": "No transactions found",
+        "noTransactionsMessage": "Start by adding your first transaction to track your income and expenses."
     },
     "category": {
         "categories": "Categories",
@@ -143,6 +146,12 @@
         "subtitle": "A personal financial management platform that helps you track expenses and achieve your financial goals.",
         "goToDashboard": "Go to Dashboard",
         "signIn": "Sign In"
+    },
+    "auth": {
+        "authenticating": "Authenticating...",
+        "pleaseWait": "Please wait while we verify your credentials",
+        "authenticationSuccess": "Authentication Successful!",
+        "redirecting": "Redirecting you to dashboard..."
     },
     "components": {
         "aiSummarize": {

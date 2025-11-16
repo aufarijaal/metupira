@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const router = useRouter()
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -51,6 +52,7 @@ const fetchCategories = async () => {
             .from('categories')
             .select('id, name, type')
             .order('name')
+            .eq('user_id', user.value?.id)
 
         if (fetchError) throw fetchError
         if (data) categories.value = data

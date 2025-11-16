@@ -9,6 +9,12 @@ useHead({
 });
 
 const { locales, setLocale, locale } = useI18n();
+
+const handleLanguageChange = async () => {
+    await setLocale(locale.value);
+    // Reload the page to ensure all components are refreshed with the new language
+    window.location.reload();
+};
 </script>
 
 <template>
@@ -24,7 +30,7 @@ const { locales, setLocale, locale } = useI18n();
         <!-- Language switcher -->
         <div class="bg-base-100 p-6 rounded-box shadow">
             <h2 class="text-2xl font-bold mb-4">{{ $t('settings.language') }}</h2>
-            <select v-model="locale" @change="setLocale(locale)" class="select select-bordered w-full max-w-xs">
+            <select v-model="locale" @change="handleLanguageChange" class="select select-bordered w-full max-w-xs">
                 <option v-for="lang in locales" :key="lang.code" :value="lang.code">
                     {{ lang.name }}
                 </option>

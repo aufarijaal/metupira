@@ -24,7 +24,8 @@
         "income": "Pemasukan",
         "expense": "Pengeluaran",
         "ascending": "Naik",
-        "descending": "Turun"
+        "descending": "Turun",
+        "languageCode": "id"
     },
     "transaction": {
         "addNewTransaction": "Tambah Transaksi Baru",
@@ -48,7 +49,9 @@
         "perPage": "per halaman",
         "noCategoriesAvailable": "Tidak ada kategori tersedia!",
         "noCategoriesMessage": "Anda perlu menambahkan beberapa kategori terlebih dahulu sebelum membuat transaksi.",
-        "goToCategories": "Ke Halaman Kategori"
+        "goToCategories": "Ke Halaman Kategori",
+        "noTransactionsFound": "Tidak ada transaksi ditemukan",
+        "noTransactionsMessage": "Mulai dengan menambahkan transaksi pertama Anda untuk melacak pemasukan dan pengeluaran."
     },
     "category": {
         "categories": "Kategori",
@@ -143,6 +146,12 @@
         "subtitle": "Platform manajemen keuangan pribadi yang membantu Anda melacak pengeluaran dan mencapai tujuan keuangan Anda.",
         "goToDashboard": "Ke Dasbor",
         "signIn": "Masuk"
+    },
+    "auth": {
+        "authenticating": "Mengautentikasi...",
+        "pleaseWait": "Mohon tunggu sementara kami memverifikasi kredensial Anda",
+        "authenticationSuccess": "Autentikasi Berhasil!",
+        "redirecting": "Mengarahkan Anda ke dasbor..."
     },
     "components": {
         "aiSummarize": {
