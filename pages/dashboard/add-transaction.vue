@@ -7,6 +7,8 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 const router = useRouter()
+const { t } = useI18n()
+const localePath = useLocalePath()
 
 interface Category {
     id: number
@@ -86,7 +88,7 @@ const handleSubmit = async () => {
 
         if (dbError) throw dbError
 
-        alertMessage.value = 'Transaction added successfully!'
+        alertMessage.value = t('transaction.transactionAddedSuccess')
         alertType.value = 'info'
         showAlert.value = true
 
@@ -101,7 +103,7 @@ const handleSubmit = async () => {
     } catch (e: any) {
         error.value = e.message
 
-        alertMessage.value = 'Error: ' + e.message
+        alertMessage.value = t('error.somethingWentWrong') + ': ' + e.message
         alertType.value = 'error'
     } finally {
         loading.value = false
@@ -159,7 +161,25 @@ const handleSubmit = async () => {
                     <label class="label">
                         <span class="label-text">{{ $t('common.category') }}</span>
                     </label>
-                    <select v-model="form.category_id" class="select select-bordered w-full" required>
+
+                    <!-- No Categories Warning -->
+                    <div v-if="filteredCategories.length === 0" class="alert alert-warning mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <div class="font-bold">{{ $t('transaction.noCategoriesAvailable') }}</div>
+                            <div class="text-sm">{{ $t('transaction.noCategoriesMessage') }}</div>
+                        </div>
+                        <NuxtLink :to="localePath('/dashboard/categories')" class="btn btn-sm btn-primary">
+                            {{ $t('transaction.goToCategories') }}
+                        </NuxtLink>
+                    </div>
+
+                    <select v-model="form.category_id" class="select select-bordered w-full" required
+                        :disabled="filteredCategories.length === 0">
                         <option :value="0">{{ $t('transaction.selectCategory') }}</option>
                         <option v-for="category in filteredCategories" :key="category.id" :value="category.id">
                             {{ category.name }}
@@ -190,7 +210,8 @@ const handleSubmit = async () => {
 
                 <!-- Submit Button -->
                 <div class="form-control">
-                    <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+                    <button type="submit" class="btn btn-primary w-full"
+                        :disabled="loading || filteredCategories.length === 0">
                         <span v-if="loading">{{ $t('transaction.adding') }}</span>
                         <span v-else>{{ $t('transaction.addTransaction') }}</span>
                     </button>

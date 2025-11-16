@@ -13,6 +13,7 @@ interface CategoryForm {
 }
 
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const categories = ref<Category[]>([])
 const loading = ref(false)
 const error = ref('')
@@ -42,6 +43,7 @@ const fetchCategories = async () => {
             .select('*')
             .order('type')
             .order('name')
+            .eq('user_id', user.value?.id)
 
         if (fetchError) throw fetchError
         categories.value = data || []
@@ -258,7 +260,7 @@ definePageMeta({
                     </div>
                     <div class="modal-action">
                         <button type="button" class="btn" @click="showAddModal = false">{{ $t('common.cancel')
-                            }}</button>
+                        }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">
                             {{ loading ? $t('category.adding') : $t('category.addCategory') }}
                         </button>
@@ -292,7 +294,7 @@ definePageMeta({
                     </div>
                     <div class="modal-action">
                         <button type="button" class="btn" @click="showEditModal = false">{{ $t('common.cancel')
-                            }}</button>
+                        }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">
                             {{ loading ? $t('category.saving') : $t('common.saveChanges') }}
                         </button>

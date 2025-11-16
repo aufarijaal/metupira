@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const { t } = useI18n()
 
 const loading = ref(false)
@@ -32,6 +33,7 @@ const generateSummary = async () => {
             .order('transaction_at', { ascending: false })
             // limit 7 days
             .gte('transaction_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+            .eq('user_id', user.value?.id)
 
         if (fetchError) throw fetchError
 

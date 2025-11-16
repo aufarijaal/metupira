@@ -45,7 +45,10 @@
         "typeFilter": "Type Filter",
         "sortBy": "Sort By",
         "sortOrder": "Sort Order",
-        "perPage": "per page"
+        "perPage": "per page",
+        "noCategoriesAvailable": "No categories available!",
+        "noCategoriesMessage": "You need to add some categories first before creating transactions.",
+        "goToCategories": "Go to Categories"
     },
     "category": {
         "categories": "Categories",

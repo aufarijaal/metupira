@@ -38,6 +38,7 @@ const editForm = ref({
 
 const categories = ref<{ id: number; name: string }[]>([])
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 
 // Fetch transactions with their category names
 const fetchTransactions = async () => {
@@ -54,6 +55,7 @@ const fetchTransactions = async () => {
                 )
             `)
             .order('transaction_at', { ascending: false })
+            .eq('user_id', user.value?.id)
 
         if (dbError) throw dbError
 
@@ -343,7 +345,7 @@ definePageMeta({
                     </select>
                     <span class="text-sm">
                         {{ $t('common.page') }} {{ table.getState().pagination.pageIndex + 1 }} {{ $t('common.of') }} {{
-                        table.getPageCount() }}
+                            table.getPageCount() }}
                     </span>
                 </div>
                 <div class="join">
@@ -398,9 +400,9 @@ definePageMeta({
 
                     <div class="modal-action">
                         <button type="button" class="btn" @click="isEditModalOpen = false">{{ $t('common.cancel')
-                            }}</button>
+                        }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">{{ $t('common.saveChanges')
-                            }}</button>
+                        }}</button>
                     </div>
                 </form>
             </div>
@@ -417,7 +419,7 @@ definePageMeta({
                 <div class="modal-action">
                     <button class="btn" @click="isDeleteModalOpen = false">{{ $t('common.cancel') }}</button>
                     <button class="btn btn-error" @click="handleDelete" :disabled="loading">{{ $t('common.delete')
-                        }}</button>
+                    }}</button>
                 </div>
             </div>
             <form method="dialog" class="modal-backdrop" @click="isDeleteModalOpen = false">

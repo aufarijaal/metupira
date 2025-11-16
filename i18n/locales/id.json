@@ -45,7 +45,10 @@
         "typeFilter": "Filter Tipe",
         "sortBy": "Urutkan Berdasarkan",
         "sortOrder": "Urutan",
-        "perPage": "per halaman"
+        "perPage": "per halaman",
+        "noCategoriesAvailable": "Tidak ada kategori tersedia!",
+        "noCategoriesMessage": "Anda perlu menambahkan beberapa kategori terlebih dahulu sebelum membuat transaksi.",
+        "goToCategories": "Ke Halaman Kategori"
     },
     "category": {
         "categories": "Kategori",
