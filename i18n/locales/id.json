@@ -28,6 +28,8 @@
         "languageCode": "id"
     },
     "transaction": {
+        "transaction": "Transaksi",
+        "transactions": "Transaksi",
         "addNewTransaction": "Tambah Transaksi Baru",
         "allTransactions": "Semua Transaksi",
         "transactionType": "Tipe Transaksi",
@@ -54,6 +56,7 @@
         "noTransactionsMessage": "Mulai dengan menambahkan transaksi pertama Anda untuk melacak pemasukan dan pengeluaran."
     },
     "category": {
+        "category": "Kategori",
         "categories": "Kategori",
         "addCategory": "Tambah Kategori",
         "addNewCategory": "Tambah Kategori Baru",
@@ -95,7 +98,8 @@
         "emailRequired": "Silakan masukkan alamat email.",
         "aliasRequired": "Silakan masukkan alias.",
         "emailNotFound": "Email tidak ditemukan di catatan kami.",
-        "noAccountsFound": "Tidak ada akun terhubung ditemukan"
+        "noAccountsFound": "Tidak ada akun terhubung ditemukan",
+        "cannotLinkOwnAccount": "Anda tidak dapat menghubungkan akun Anda sendiri. Silakan masukkan alamat email yang berbeda."
     },
     "settings": {
         "title": "Pengaturan",

@@ -28,6 +28,8 @@
         "languageCode": "en"
     },
     "transaction": {
+        "transaction": "Transaction",
+        "transactions": "Transactions",
         "addNewTransaction": "Add New Transaction",
         "allTransactions": "All Transactions",
         "transactionType": "Transaction Type",
@@ -54,6 +56,7 @@
         "noTransactionsMessage": "Start by adding your first transaction to track your income and expenses."
     },
     "category": {
+        "category": "Category",
         "categories": "Categories",
         "addCategory": "Add Category",
         "addNewCategory": "Add New Category",
@@ -95,7 +98,8 @@
         "emailRequired": "Please enter an email address.",
         "aliasRequired": "Please enter an alias.",
         "emailNotFound": "Email not found in our records.",
-        "noAccountsFound": "No linked accounts found"
+        "noAccountsFound": "No linked accounts found",
+        "cannotLinkOwnAccount": "You cannot link your own account. Please enter a different email address."
     },
     "settings": {
         "title": "Settings",

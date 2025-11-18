@@ -10,6 +10,7 @@ definePageMeta({
 const supabase = useSupabaseClient()
 const router = useRouter()
 const user = useSupabaseUser()
+const { t } = useI18n()
 
 const linkedAccountsAsParent = ref([])
 const linkedAccountsAsChild = ref([])
@@ -59,7 +60,7 @@ async function fetchLinkedAccounts() {
         if (childErr) throw childErr
         linkedAccountsAsChild.value = childData || []
     } catch (e: any) {
-        error.value = 'Failed to load linked accounts: ' + e.message
+        error.value = t('error.failedToLoad', { resource: t('linkedAccounts.title').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -67,11 +68,17 @@ async function fetchLinkedAccounts() {
 
 const handleAddAccount = () => {
     if (!newAccountEmail.value) {
-        error.value = "Please enter an email address.";
+        error.value = t('linkedAccounts.emailRequired');
         return;
     }
     if (!newAccountAlias.value) {
-        error.value = "Please enter an alias.";
+        error.value = t('linkedAccounts.aliasRequired');
+        return;
+    }
+
+    // Check if user is trying to link their own email
+    if (newAccountEmail.value.toLowerCase() === user.value?.email?.toLowerCase()) {
+        error.value = t('linkedAccounts.cannotLinkOwnAccount');
         return;
     }
 
@@ -82,13 +89,13 @@ const handleAddAccount = () => {
         .eq('email', newAccountEmail.value)
         .then(({ data, error: err }) => {
             if (err) {
-                error.value = 'Failed to check email: ' + err.message;
+                error.value = t('error.failedToLoad', { resource: 'email', message: err.message });
                 loading.value = false;
                 return;
             }
 
             if (data.length === 0) {
-                error.value = 'Email not found in our records.';
+                error.value = t('linkedAccounts.emailNotFound');
                 loading.value = false;
                 return;
             }
@@ -105,19 +112,20 @@ const handleAddAccount = () => {
                 .then(({ error: insertError }) => {
                     loading.value = false;
                     if (insertError) {
-                        error.value = 'Failed to add linked account: ' + insertError.message;
+                        error.value = t('error.failedToAdd', { resource: t('linkedAccounts.title').toLowerCase(), message: insertError.message });
                     } else {
                         isAddAccountModalOpen.value = false; // Close modal on success
                         newAccountEmail.value = ""; // Reset input
+                        newAccountAlias.value = ""; // Reset alias input
                         error.value = "";
                         fetchLinkedAccounts(); // Refresh the list
                     }
                 });
-        })
+        });
 }
 
 const removeAccount = async (id: number) => {
-    if (!window.confirm('Are you sure you want to remove this linked account?')) return;
+    if (!window.confirm(t('linkedAccounts.confirmRemove'))) return;
     loading.value = true
     error.value = ""
     try {
@@ -128,7 +136,7 @@ const removeAccount = async (id: number) => {
         if (err) throw err
         fetchLinkedAccounts()
     } catch (e: any) {
-        error.value = 'Failed to remove linked account: ' + e.message
+        error.value = t('error.failedToDelete', { resource: t('linkedAccounts.title').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -145,14 +153,14 @@ const revokeLink = async (id: number) => {
         if (err) throw err
         fetchLinkedAccounts()
     } catch (e: any) {
-        error.value = 'Failed to revoke link: ' + e.message
+        error.value = t('error.failedToUpdate', { resource: t('linkedAccounts.title').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
 }
 
 const allowLink = async (id: number) => {
-    if (!window.confirm('Are you sure you want to approve this linking request?')) return;
+    if (!window.confirm(t('linkedAccounts.confirmApprove'))) return;
     loading.value = true
     error.value = ""
     try {
@@ -163,7 +171,7 @@ const allowLink = async (id: number) => {
         if (err) throw err
         fetchLinkedAccounts()
     } catch (e: any) {
-        error.value = 'Failed to approve link: ' + e.message
+        error.value = t('error.failedToUpdate', { resource: t('linkedAccounts.title').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }

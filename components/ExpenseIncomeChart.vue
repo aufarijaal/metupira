@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { ChartData } from '~/types'
 import { useTheme } from '~/composables/useTheme'
 // Import the echarts core module, which provides the necessary interfaces for using echarts.
@@ -37,6 +37,107 @@ const props = defineProps<{
 
 const { isDark } = useTheme()
 const { t } = useI18n()
+
+// Dialog state
+const isDialogOpen = ref(false)
+const selectedDate = ref('')
+const selectedExpense = ref(0)
+const selectedIncome = ref(0)
+const selectedTransactions = ref<any[]>([])
+const loadingTransactions = ref(false)
+
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+
+const parseDateString = (dateStr: string) => {
+    // 1. Split the components: ["10", "Nov", "2025"]
+    const [dayStr, monthStr, yearStr] = dateStr.split(' ');
+
+    // 2. Map the month abbreviation to its index (0-11)
+    const monthAbbreviations = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    // Find the 0-indexed month number
+    const monthIndex = monthAbbreviations.findIndex(m => m === monthStr);
+
+    // 3. Create the Date object
+    if (monthIndex > -1) {
+        // The Date constructor uses (year, monthIndex (0-11), day)
+        const dateObject = new Date(
+            Number(yearStr),
+            monthIndex,
+            Number(dayStr)
+        );
+        return dateObject;
+    }
+
+    // Return null or throw an error if parsing failed
+    return null;
+};
+
+// Fetch transactions for selected date
+const fetchTransactionsForDate = async (date: string) => {
+    loadingTransactions.value = true
+    try {
+        // Parse the date string (format: DD/MM/YYYY)
+        const startDate = parseDateString(date)
+        startDate!.setHours(0, 0, 0, 0)
+
+        const endDate = parseDateString(date)
+        endDate!.setHours(23, 59, 59, 999)
+
+        const { data, error } = await supabase
+            .from('transactions')
+            .select(`
+                id,
+                type,
+                amount,
+                note,
+                transaction_at,
+                categories (
+                    name
+                )
+            `)
+            .eq('user_id', user.value?.id)
+            .gte('transaction_at', startDate.toISOString())
+            .lte('transaction_at', endDate.toISOString())
+            .order('transaction_at', { ascending: false })
+
+        console.log(startDate.toISOString())
+        console.log(endDate.toISOString())
+
+        if (error) throw error
+
+        selectedTransactions.value = (data || []).map((t: any) => ({
+            ...t,
+            category_name: t.categories?.name || 'Uncategorized'
+        }))
+
+        console.log(
+            data
+        )
+    } catch (error) {
+        console.error('Error fetching transactions:', error)
+        selectedTransactions.value = []
+    } finally {
+        loadingTransactions.value = false
+    }
+}
+
+// Handle chart click
+const handleChartClick = async (params: any) => {
+    if (params.componentType === 'series') {
+        const dataIndex = params.dataIndex
+        selectedDate.value = props.data.dates[dataIndex]
+        selectedExpense.value = props.data.expense[dataIndex]
+        selectedIncome.value = props.data.income[dataIndex]
+        isDialogOpen.value = true
+
+        // Fetch transactions for the selected date
+        await fetchTransactionsForDate(selectedDate.value)
+    }
+}
 
 const option = computed(() => ({
     tooltip: {
@@ -201,7 +302,92 @@ const option = computed(() => ({
 <template>
     <div class="w-full h-[400px]">
         <client-only>
-            <v-chart class="w-full h-full" :option="option" autoresize />
+            <v-chart class="w-full h-full" :option="option" autoresize @click="handleChartClick" />
         </client-only>
+
+        <!-- Dialog Modal -->
+        <dialog class="modal" :class="{ 'modal-open': isDialogOpen }">
+            <div class="modal-box max-w-3xl w-full mx-4">
+                <h3 class="font-bold text-base sm:text-lg mb-4">
+                    {{ $t('transaction.transactionDate') }}: {{ selectedDate }}
+                </h3>
+
+                <!-- Summary Stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <div class="stat bg-error/10 rounded-lg p-3 sm:p-4">
+                        <div class="stat-title text-error text-xs sm:text-sm">{{ $t('common.expense') }}</div>
+                        <div class="stat-value text-lg sm:text-2xl text-error">
+                            {{ selectedExpense.toLocaleString('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }) }}
+                        </div>
+                    </div>
+                    <div class="stat bg-success/10 rounded-lg p-3 sm:p-4">
+                        <div class="stat-title text-success text-xs sm:text-sm">{{ $t('common.income') }}</div>
+                        <div class="stat-value text-lg sm:text-2xl text-success">
+                            {{ selectedIncome.toLocaleString('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Details -->
+                <div v-if="loadingTransactions" class="flex justify-center py-8">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+
+                <div v-else-if="selectedTransactions.length === 0" class="text-center py-8 text-base-content/60 text-sm">
+                    {{ $t('transaction.noTransactionsFound') }}
+                </div>
+
+                <div v-else class="space-y-2 sm:space-y-3 max-h-60 sm:max-h-96 overflow-y-auto">
+                    <div v-for="transaction in selectedTransactions" :key="transaction.id"
+                        class="card bg-base-200 shadow-sm">
+                        <div class="card-body p-3 sm:p-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
+                                <div class="flex-1">
+                                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                                        <span :class="[
+                                            'badge badge-sm sm:badge-md',
+                                            transaction.type === 'income' ? 'badge-success' : 'badge-error'
+                                        ]">
+                                            {{ transaction.type === 'income' ? $t('common.income') :
+                                                $t('common.expense') }}
+                                        </span>
+                                        <span class="badge badge-outline badge-sm sm:badge-md">{{ transaction.category_name }}</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-base-content/70 break-words">{{ transaction.note }}</p>
+                                </div>
+                                <div :class="[
+                                    'text-base sm:text-xl font-bold mt-1 sm:mt-0 sm:ml-4 shrink-0',
+                                    transaction.type === 'income' ? 'text-success' : 'text-error'
+                                ]">
+                                    {{ transaction.amount.toLocaleString('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    }) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-action mt-4 sm:mt-6">
+                    <button class="btn btn-sm sm:btn-md w-full sm:w-auto" @click="isDialogOpen = false">{{ $t('common.close') }}</button>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop" @click="isDialogOpen = false">
+                <button>{{ $t('common.close') }}</button>
+            </form>
+        </dialog>
     </div>
 </template>

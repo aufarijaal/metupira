@@ -14,6 +14,7 @@ interface CategoryForm {
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const { t } = useI18n()
 const categories = ref<Category[]>([])
 const loading = ref(false)
 const error = ref('')
@@ -48,7 +49,7 @@ const fetchCategories = async () => {
         if (fetchError) throw fetchError
         categories.value = data || []
     } catch (e: any) {
-        error.value = 'Failed to load categories: ' + e.message
+        error.value = t('error.failedToLoad', { resource: t('category.categories').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -77,7 +78,7 @@ const handleAdd = async () => {
         showAddModal.value = false
         resetForm()
     } catch (e: any) {
-        error.value = 'Failed to add category: ' + e.message
+        error.value = t('error.failedToAdd', { resource: t('category.category').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -109,7 +110,7 @@ const handleEdit = async () => {
         showEditModal.value = false
         resetForm()
     } catch (e: any) {
-        error.value = 'Failed to update category: ' + e.message
+        error.value = t('error.failedToUpdate', { resource: t('category.category').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -134,7 +135,7 @@ const handleDelete = async () => {
         showDeleteModal.value = false
         selectedCategory.value = null
     } catch (e: any) {
-        error.value = 'Failed to delete category: ' + e.message
+        error.value = t('error.failedToDelete', { resource: t('category.category').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -260,7 +261,7 @@ definePageMeta({
                     </div>
                     <div class="modal-action">
                         <button type="button" class="btn" @click="showAddModal = false">{{ $t('common.cancel')
-                        }}</button>
+                            }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">
                             {{ loading ? $t('category.adding') : $t('category.addCategory') }}
                         </button>
@@ -294,7 +295,7 @@ definePageMeta({
                     </div>
                     <div class="modal-action">
                         <button type="button" class="btn" @click="showEditModal = false">{{ $t('common.cancel')
-                        }}</button>
+                            }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">
                             {{ loading ? $t('category.saving') : $t('common.saveChanges') }}
                         </button>

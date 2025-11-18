@@ -57,7 +57,7 @@ const fetchCategories = async () => {
         if (fetchError) throw fetchError
         if (data) categories.value = data
     } catch (e: any) {
-        error.value = 'Failed to load categories: ' + e.message
+        error.value = t('error.failedToLoad', { resource: t('category.categories').toLowerCase(), message: e.message })
     }
 }
 

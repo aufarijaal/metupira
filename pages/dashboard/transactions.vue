@@ -39,6 +39,8 @@ const editForm = ref({
 const categories = ref<{ id: number; name: string }[]>([])
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const { t } = useI18n()
+const localePath = useLocalePath()
 
 // Fetch transactions with their category names
 const fetchTransactions = async () => {
@@ -68,7 +70,7 @@ const fetchTransactions = async () => {
             }).format(new Date(t.transaction_at))
         }))
     } catch (e: any) {
-        error.value = 'Failed to load transactions: ' + e.message
+        error.value = t('error.failedToLoad', { resource: t('transaction.transactions').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -179,7 +181,7 @@ const fetchCategories = async () => {
         if (dbError) throw dbError
         categories.value = data || []
     } catch (e: any) {
-        error.value = 'Failed to load categories: ' + e.message
+        error.value = t('error.failedToLoad', { resource: t('category.categories').toLowerCase(), message: e.message })
     }
 }
 
@@ -223,7 +225,7 @@ const handleEdit = async () => {
         isEditModalOpen.value = false
         selectedTransaction.value = null
     } catch (e: any) {
-        error.value = 'Failed to update transaction: ' + e.message
+        error.value = t('error.failedToUpdate', { resource: t('transaction.transaction').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -245,7 +247,7 @@ const handleDelete = async () => {
         isDeleteModalOpen.value = false
         selectedTransaction.value = null
     } catch (e: any) {
-        error.value = 'Failed to delete transaction: ' + e.message
+        error.value = t('error.failedToDelete', { resource: t('transaction.transaction').toLowerCase(), message: e.message })
     } finally {
         loading.value = false
     }
@@ -337,7 +339,7 @@ definePageMeta({
                                     <h3 class="text-lg font-semibold text-base-content/70">{{
                                         $t('transaction.noTransactionsFound') }}</h3>
                                     <p class="text-sm text-base-content/50">{{ $t('transaction.noTransactionsMessage')
-                                        }}</p>
+                                    }}</p>
                                 </div>
                                 <NuxtLink :to="$localePath('/dashboard/add-transaction')"
                                     class="btn btn-primary btn-sm">
@@ -423,9 +425,9 @@ definePageMeta({
 
                     <div class="modal-action">
                         <button type="button" class="btn" @click="isEditModalOpen = false">{{ $t('common.cancel')
-                            }}</button>
+                        }}</button>
                         <button type="submit" class="btn btn-primary" :disabled="loading">{{ $t('common.saveChanges')
-                            }}</button>
+                        }}</button>
                     </div>
                 </form>
             </div>
@@ -442,7 +444,7 @@ definePageMeta({
                 <div class="modal-action">
                     <button class="btn" @click="isDeleteModalOpen = false">{{ $t('common.cancel') }}</button>
                     <button class="btn btn-error" @click="handleDelete" :disabled="loading">{{ $t('common.delete')
-                        }}</button>
+                    }}</button>
                 </div>
             </div>
             <form method="dialog" class="modal-backdrop" @click="isDeleteModalOpen = false">
