@@ -159,6 +159,26 @@ const revokeLink = async (id: number) => {
     }
 }
 
+const rejectLink = async (id: number) => {
+    if (!window.confirm(t('linkedAccounts.confirmReject'))) return;
+    loading.value = true
+    error.value = ""
+    try {
+        const { error: err } = await supabase
+            .from('linked_accounts')
+            .update(
+                { status: 'rejected', rejected_at: new Date().toISOString() }
+            )
+            .eq('id', id)
+        if (err) throw err
+        fetchLinkedAccounts()
+    } catch (e: any) {
+        error.value = t('error.failedToUpdate', { resource: t('linkedAccounts.title').toLowerCase(), message: e.message })
+    } finally {
+        loading.value = false
+    }
+}
+
 const allowLink = async (id: number) => {
     if (!window.confirm(t('linkedAccounts.confirmApprove'))) return;
     loading.value = true
@@ -262,13 +282,18 @@ onMounted(() => {
                             <td>{{ account.alias }}</td>
                             <td>{{ $t(`linkedAccounts.${account.status}`) }}</td>
                             <td>
-                                <div>
-                                    <!-- Button to allow if pending -->
-                                    <button v-if="account.status === 'pending'" class="btn btn-success btn-sm mr-2"
-                                        @click="allowLink(account.id)">{{ $t('linkedAccounts.approve') }}</button>
-                                    <!-- Button to revoke if not revoked -->
-                                    <button v-if="account.status !== 'revoked'" class="btn btn-warning btn-sm"
-                                        @click="revokeLink(account.id)">{{ $t('linkedAccounts.revoke') }}</button>
+                                <div class="flex gap-2">
+                                    <!-- Show Approve and Reject buttons for pending status -->
+                                    <template v-if="account.status === 'pending'">
+                                        <button class="btn btn-success btn-sm" @click="allowLink(account.id)">{{
+                                            $t('linkedAccounts.approve') }}</button>
+                                        <button class="btn btn-error btn-sm" @click="rejectLink(account.id)">{{
+                                            $t('linkedAccounts.reject') }}</button>
+                                    </template>
+                                    <!-- Show Revoke button for approved status -->
+                                    <button v-else-if="account.status === 'approved'" class="btn btn-warning btn-sm"
+                                        @click="revokeLink(account.id)">{{
+                                            $t('linkedAccounts.revoke') }}</button>
                                 </div>
                             </td>
                         </tr>
